@@ -1,6 +1,63 @@
-import { hasEnvVars } from '@/utils/supabase/check-env-vars';
+import { createClient } from '@/utils/supabase/server';
+import { EventCard } from '@/components/event-card';
+import { EventsFilter } from '@/components/events-filter';
+import { Suspense } from 'react';
+import { EventsLoadingSkeleton } from '@/components/events-loading-skeleton';
+import { InfiniteScroll } from '@/components/infinite-scroll';
 
-export default async function Home() {
+const ITEMS_PER_PAGE = 12;
+
+export default async function Home({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | undefined };
+}) {
+    const supabase = await createClient();
+
+    // Build query based on filters
+    let query = supabase
+        .from('events')
+        .select(
+            `
+            *,
+            event_types(name),
+            locations(name, city),
+            organiser_profiles(name)
+        `
+        )
+        .eq('is_published', true)
+        .order('starts_at', { ascending: true });
+
+    // Apply filters
+    if (searchParams.search) {
+        query = query.ilike('title', `%${searchParams.search}%`);
+    }
+    if (searchParams.type) {
+        query = query.eq('type_id', searchParams.type);
+    }
+    if (searchParams.location) {
+        query = query.eq('location_id', searchParams.location);
+    }
+
+    // Add pagination
+    const page = Number(searchParams.page) || 1;
+    query = query.range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE - 1);
+
+    const { data: events, error, count } = await query;
+
+    if (error) {
+        console.error('Error fetching events:', error);
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="text-destructive">
+                    Failed to load events. Please try again later.
+                </div>
+            </div>
+        );
+    }
+
+    const hasMore = Boolean(count && events.length < count);
+
     return (
         <div className="min-h-screen flex flex-col">
             <main className="flex-1 container mx-auto px-4 py-8">
@@ -15,23 +72,31 @@ export default async function Home() {
                         </p>
                     </div>
 
-                    {!hasEnvVars ? (
-                        <div className="rounded-lg border border-destructive p-4 text-destructive">
-                            <p>
-                                Please configure your Supabase environment
-                                variables to continue.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Event cards will go here */}
-                            <div className="rounded-lg border p-4">
-                                <p className="text-muted-foreground">
-                                    Featured events coming soon...
-                                </p>
+                    <EventsFilter />
+
+                    <Suspense fallback={<EventsLoadingSkeleton />}>
+                        <InfiniteScroll
+                            hasMore={hasMore}
+                            currentPage={page}
+                            itemCount={events?.length ?? 0}
+                        >
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {events?.length ? (
+                                    events.map((event) => (
+                                        <EventCard
+                                            key={event.id}
+                                            event={event}
+                                        />
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground col-span-full text-center py-12">
+                                        No events found. Try adjusting your
+                                        filters.
+                                    </p>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        </InfiniteScroll>
+                    </Suspense>
                 </section>
             </main>
         </div>
