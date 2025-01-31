@@ -30,7 +30,6 @@ export function InfiniteScroll({
         }
     }, [inView, hasMore, currentPage, router, searchParams]);
 
-    // Reset page when filters change
     useEffect(() => {
         if (prevItemCount.current !== itemCount) {
             prevItemCount.current = itemCount;

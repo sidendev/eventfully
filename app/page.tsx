@@ -14,7 +14,6 @@ export default async function Home({
 }) {
     const supabase = await createClient();
 
-    // Build query based on filters
     let query = supabase
         .from('events')
         .select(
@@ -28,7 +27,6 @@ export default async function Home({
         .eq('is_published', true)
         .order('starts_at', { ascending: true });
 
-    // Apply filters
     if (searchParams.search) {
         query = query.ilike('title', `%${searchParams.search}%`);
     }
@@ -39,7 +37,6 @@ export default async function Home({
         query = query.eq('location_id', searchParams.location);
     }
 
-    // Add pagination
     const page = Number(searchParams.page) || 1;
     query = query.range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE - 1);
 
