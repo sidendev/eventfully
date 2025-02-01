@@ -6,6 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { UserCircle } from 'lucide-react';
+import { updateProfile } from '@/app/actions/profile';
+import { SubmitButton } from '@/components/submit-button';
+import { UploadImage } from '@/components/upload-image';
 
 export default async function ProfilePage() {
     const supabase = await createClient();
@@ -17,6 +20,13 @@ export default async function ProfilePage() {
     if (!user) {
         return redirect('/sign-in');
     }
+
+    // Getting the user's profile data
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -35,20 +45,17 @@ export default async function ProfilePage() {
 
                         <div className="space-y-6">
                             {/* Profile Picture Section */}
-                            <div className="flex items-center gap-4">
-                                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-                                    <UserCircle className="w-12 h-12 text-muted-foreground" />
-                                </div>
-                                <Button variant="outline">Change Photo</Button>
-                            </div>
+                            <UploadImage defaultValue={profile?.avatar_url} />
 
                             {/* Profile Form */}
-                            <form className="space-y-4">
+                            <form action={updateProfile} className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="username">Username</Label>
                                     <Input
                                         id="username"
+                                        name="username"
                                         placeholder="Your username"
+                                        defaultValue={profile?.username || ''}
                                     />
                                 </div>
 
@@ -56,8 +63,10 @@ export default async function ProfilePage() {
                                     <Label htmlFor="bio">Bio</Label>
                                     <Textarea
                                         id="bio"
+                                        name="bio"
                                         placeholder="Tell us about yourself"
                                         rows={4}
+                                        defaultValue={profile?.bio || ''}
                                     />
                                 </div>
 
@@ -72,7 +81,9 @@ export default async function ProfilePage() {
                                 </div>
 
                                 <div className="pt-4 flex justify-between items-center">
-                                    <Button type="submit">Save Changes</Button>
+                                    <SubmitButton pendingText="Saving Changes...">
+                                        Save Changes
+                                    </SubmitButton>
                                     <Button variant="outline" asChild>
                                         <Link href="/events/create">
                                             Create Event

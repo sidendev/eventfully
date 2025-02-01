@@ -6,6 +6,9 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import Link from 'next/link';
 import './globals.css';
+import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
+import { extractRouterConfig } from 'uploadthing/server';
+import { ourFileRouter } from '@/app/api/uploadthing/core';
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -57,6 +60,9 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
+                    <NextSSRPlugin
+                        routerConfig={extractRouterConfig(ourFileRouter)}
+                    />
                     <div className="min-h-screen flex flex-col">
                         <header>
                             <nav className="border-b border-b-foreground/10">
