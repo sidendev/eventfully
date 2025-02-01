@@ -26,6 +26,7 @@ export function UploadImage({ onChange, defaultValue }: UploadImageProps) {
                     <UserCircle className="w-12 h-12 text-muted-foreground group-hover:scale-105 transition-transform duration-200" />
                 )}
             </div>
+            <input type="hidden" name="avatar_url" value={imageUrl || ''} />
             <UploadButton<OurFileRouter, 'profileImage'>
                 endpoint="profileImage"
                 onClientUploadComplete={(res) => {
