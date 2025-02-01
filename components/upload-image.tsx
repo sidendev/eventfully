@@ -4,6 +4,7 @@ import { UploadButton } from '@uploadthing/react';
 import { OurFileRouter } from '@/app/api/uploadthing/core';
 import { useState } from 'react';
 import { UserCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface UploadImageProps {
     onChange?: (url?: string) => void;
@@ -33,10 +34,12 @@ export function UploadImage({ onChange, defaultValue }: UploadImageProps) {
                     if (res?.[0]) {
                         setImageUrl(res[0].url);
                         onChange?.(res[0].url);
+                        toast.success('Image uploaded successfully');
                     }
                 }}
                 onUploadError={(error: Error) => {
-                    console.error(error);
+                    console.error('Upload error:', error);
+                    toast.error('Error uploading image');
                 }}
                 className="ut-button:bg-primary ut-button:hover:bg-primary/90 ut-button:transition-colors ut-button:duration-200"
             />
