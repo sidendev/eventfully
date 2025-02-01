@@ -44,11 +44,13 @@ export default async function ProfilePage() {
                         </div>
 
                         <div className="space-y-6">
-                            {/* Profile Picture Section */}
-                            <UploadImage defaultValue={profile?.avatar_url} />
-
-                            {/* Profile Form */}
                             <form action={updateProfile} className="space-y-4">
+                                {/* Profile Picture Section */}
+                                <UploadImage
+                                    defaultValue={profile?.avatar_url}
+                                    name="avatar_url"
+                                />
+
                                 <div className="space-y-2">
                                     <Label htmlFor="username">Username</Label>
                                     <Input
@@ -56,6 +58,7 @@ export default async function ProfilePage() {
                                         name="username"
                                         placeholder="Your username"
                                         defaultValue={profile?.username || ''}
+                                        required
                                     />
                                 </div>
 
@@ -65,7 +68,6 @@ export default async function ProfilePage() {
                                         id="bio"
                                         name="bio"
                                         placeholder="Tell us about yourself"
-                                        rows={4}
                                         defaultValue={profile?.bio || ''}
                                     />
                                 </div>

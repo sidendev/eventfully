@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 interface UploadImageProps {
     onChange?: (url?: string) => void;
     defaultValue?: string;
+    name?: string;
 }
 
 export function UploadImage({ onChange, defaultValue }: UploadImageProps) {

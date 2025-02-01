@@ -229,6 +229,24 @@ CREATE POLICY "Event types are viewable by everyone"
     ON public.event_types FOR SELECT
     USING (true);
 
+DROP POLICY IF EXISTS "Event types can be modified by authenticated users" ON public.event_types;
+
+CREATE POLICY "Event types can be inserted by authenticated users" 
+    ON public.event_types 
+    FOR INSERT
+    WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Event types can be updated by authenticated users" 
+    ON public.event_types 
+    FOR UPDATE
+    USING (auth.role() = 'authenticated')
+    WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Event types can be deleted by authenticated users" 
+    ON public.event_types 
+    FOR DELETE
+    USING (auth.role() = 'authenticated');
+
 -- policies for tickets
 CREATE POLICY "Users can view their own tickets"
     ON public.tickets FOR SELECT
@@ -260,12 +278,31 @@ CREATE POLICY "Users can view all event ratings"
     ON public.event_ratings FOR SELECT
     USING (true);
 
--- events types policy:
-CREATE POLICY "Event types can only be modified by authenticated users"
-    ON public.event_types 
-    FOR ALL 
-    USING (auth.uid() IS NOT NULL)
-    WITH CHECK (auth.uid() IS NOT NULL);
+-- profiles policies
+DROP POLICY IF EXISTS "Users can manage their own profile" ON public.profiles;
+
+CREATE POLICY "Profiles are viewable by everyone"
+    ON public.profiles FOR SELECT
+    USING (true);
+
+CREATE POLICY "Users can insert their own profile"
+    ON public.profiles FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own profile"
+    ON public.profiles FOR UPDATE
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own profile"
+    ON public.profiles FOR DELETE
+    USING (auth.uid() = user_id);
+
+-- organiser profiles policies
+CREATE POLICY "Users can manage their own organiser profile"
+    ON public.organiser_profiles 
+    FOR ALL USING (auth.uid() = user_id) 
+    WITH CHECK (auth.uid() = user_id);
 
 -- Sample data (only keeping lookup tables data)
 INSERT INTO public.event_types (name, description) VALUES
@@ -323,3 +360,9 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Add trigger for profiles table to handle updated_at
+CREATE TRIGGER update_profiles_updated_at
+    BEFORE UPDATE ON public.profiles
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
