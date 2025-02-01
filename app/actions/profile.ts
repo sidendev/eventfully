@@ -14,15 +14,28 @@ export async function updateProfile(formData: FormData) {
         return encodedRedirect('error', '/sign-in', 'Not authenticated');
     }
 
+    // Get the profile first to ensure we have the correct ID
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+    if (!profile) {
+        return encodedRedirect('error', '/profile', 'Profile not found');
+    }
+
     const username = formData.get('username') as string;
     const bio = formData.get('bio') as string;
 
-    const { error } = await supabase.from('profiles').upsert({
-        id: user.id,
-        username,
-        bio,
-        updated_at: new Date().toISOString(),
-    });
+    const { error } = await supabase
+        .from('profiles')
+        .update({
+            username,
+            bio,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
 
     if (error) {
         return encodedRedirect('error', '/profile', error.message);

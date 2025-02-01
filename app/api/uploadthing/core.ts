@@ -18,17 +18,30 @@ export const ourFileRouter = {
 
             if (!user) throw new Error('Unauthorized');
 
+            // Get the profile to ensure we have the correct user profile
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            if (!profile) throw new Error('Profile not found');
+
             return { userId: user.id };
         })
         .onUploadComplete(async ({ metadata, file }) => {
             const supabase = await createClient();
 
-            // Updating the user's profile with the new avatar URL
-            await supabase.from('profiles').upsert({
-                id: metadata.userId,
-                avatar_url: file.url,
-                updated_at: new Date().toISOString(),
-            });
+            // Update the profile with the new avatar URL
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    avatar_url: file.url,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('user_id', metadata.userId);
+
+            if (error) throw error;
 
             return { uploadedBy: metadata.userId, avatar: file.url };
         }),

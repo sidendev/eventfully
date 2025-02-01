@@ -19,7 +19,10 @@ export const signUpAction = async (formData: FormData) => {
         );
     }
 
-    const { error } = await supabase.auth.signUp({
+    const {
+        data: { user },
+        error: signUpError,
+    } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -27,16 +30,29 @@ export const signUpAction = async (formData: FormData) => {
         },
     });
 
-    if (error) {
-        console.error(error.code + ' ' + error.message);
-        return encodedRedirect('error', '/sign-up', error.message);
-    } else {
-        return encodedRedirect(
-            'success',
-            '/sign-up',
-            'Thanks for signing up! Please check your email for a verification link.'
-        );
+    if (signUpError) {
+        return encodedRedirect('error', '/sign-up', signUpError.message);
     }
+
+    // Create initial profile for the user
+    if (user) {
+        const { error: profileError } = await supabase.from('profiles').insert({
+            user_id: user.id,
+            username: email.split('@')[0], // Default username from email
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+        if (profileError) {
+            console.error('Error creating profile:', profileError);
+        }
+    }
+
+    return encodedRedirect(
+        'success',
+        '/sign-up',
+        'Check your email for the confirmation link.'
+    );
 };
 
 export const signInAction = async (formData: FormData) => {

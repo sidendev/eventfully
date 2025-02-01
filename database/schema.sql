@@ -290,3 +290,36 @@ CREATE INDEX idx_organiser_profiles_user_id ON public.organiser_profiles(user_id
 CREATE INDEX idx_events_organiser_profile_id ON public.events(organiser_profile_id);
 CREATE INDEX idx_events_slug ON public.events(slug);
 CREATE INDEX idx_organiser_profiles_slug ON public.organiser_profiles(slug);
+
+-- Function to handle new user creation and set up profiles and organiser profiles
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Inserts into profiles table
+  INSERT INTO public.profiles (user_id, username, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    split_part(NEW.email, '@', 1),  -- Gets the part before @ in email
+    NOW(),
+    NOW()
+  );
+
+  -- Insert into organiser_profiles table
+  INSERT INTO public.organiser_profiles (user_id, name, slug, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    split_part(NEW.email, '@', 1),  -- Gets the part before @ in email
+    lower(replace(split_part(NEW.email, '@', 1), '.', '-')), -- Creates a URL-safe slug from email
+    NOW(),
+    NOW()
+  );
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Triggers the function every time a user is created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
