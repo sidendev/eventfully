@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
     const res = await updateSession(request);
 
     const pathname = request.nextUrl.pathname;
-    const protectedPaths = ['/events/create'];
+    const protectedPaths = ['/events/create', '/profile'];
     const isProtectedPath = protectedPaths.some((path) =>
         pathname.startsWith(path)
     );

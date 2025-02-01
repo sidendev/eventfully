@@ -1,6 +1,7 @@
 import HeaderAuth from '@/components/header-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { hasEnvVars } from '@/utils/supabase/check-env-vars';
+import { createClient } from '@/utils/supabase/server';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import Link from 'next/link';
@@ -30,11 +31,16 @@ const inter = Inter({
     variable: '--font-inter',
 });
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
     return (
         <html
             lang="en"
@@ -70,12 +76,22 @@ export default function RootLayout({
                                                 >
                                                     Browse Events
                                                 </Link>
-                                                <Link
-                                                    href="/events/create"
-                                                    className="hover:text-primary transition-colors"
-                                                >
-                                                    Create Event
-                                                </Link>
+                                                {user && (
+                                                    <>
+                                                        <Link
+                                                            href="/profile"
+                                                            className="hover:text-primary transition-colors"
+                                                        >
+                                                            Profile
+                                                        </Link>
+                                                        <Link
+                                                            href="/events/create"
+                                                            className="hover:text-primary transition-colors"
+                                                        >
+                                                            Create Event
+                                                        </Link>
+                                                    </>
+                                                )}
                                             </nav>
                                         </div>
                                         <div className="flex items-center gap-4">

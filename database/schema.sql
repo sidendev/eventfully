@@ -4,8 +4,7 @@ CREATE SCHEMA IF NOT EXISTS extensions;
 -- UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA extensions;
 
--- auth schema for users (do not create this table, use the existing one)
--- use profile table for more user features such as avatar and username
+-- use profile table for more user features such as avatar and username, auth will handle email, password and UID
 CREATE TABLE public.profiles (
     id bigint primary key generated always as identity,
     user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
