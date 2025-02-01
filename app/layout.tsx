@@ -87,7 +87,9 @@ export default function RootLayout({
                             </nav>
                         </header>
 
-                        <main className="flex-1">{children}</main>
+                        <main className="flex-1 flex flex-col items-center justify-center">
+                            <div className="w-full">{children}</div>
+                        </main>
 
                         <footer className="border-t border-t-foreground/10 py-6 mt-8">
                             <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
