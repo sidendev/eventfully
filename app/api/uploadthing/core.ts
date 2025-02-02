@@ -47,7 +47,7 @@ export const ourFileRouter = {
             const { error } = await supabase
                 .from('organiser_profiles')
                 .update({
-                    profile_image_url: file.url, // Note: using profile_image_url as per schema
+                    profile_image_url: file.url,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('user_id', metadata.userId);
@@ -55,6 +55,30 @@ export const ourFileRouter = {
             if (error) throw error;
 
             return { uploadedBy: metadata.userId };
+        }),
+    eventImage: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
+        .middleware(async () => {
+            const supabase = await createClient();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+
+            if (!user) throw new Error('Unauthorized');
+
+            // Get organiser profile to verify user can create events
+            const { data: organiserProfile } = await supabase
+                .from('organiser_profiles')
+                .select('id')
+                .eq('user_id', user.id)
+                .single();
+
+            if (!organiserProfile)
+                throw new Error('Organiser profile required');
+
+            return { userId: user.id, organiserId: organiserProfile.id };
+        })
+        .onUploadComplete(async ({ metadata, file }) => {
+            return { uploadedBy: metadata.userId, url: file.url };
         }),
 } satisfies FileRouter;
 

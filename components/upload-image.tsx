@@ -10,7 +10,7 @@ interface UploadImageProps {
     onChange?: (url?: string) => void;
     defaultValue?: string;
     name: string;
-    endpoint: 'profileImage' | 'organiserImage';
+    endpoint: 'profileImage' | 'organiserImage' | 'eventImage';
 }
 
 export function UploadImage({
