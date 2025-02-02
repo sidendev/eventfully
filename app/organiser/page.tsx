@@ -55,55 +55,13 @@ export default async function OrganiserPage() {
                             </Button>
                         </div>
 
-                        <Tabs defaultValue="overview" className="space-y-6">
+                        <Tabs defaultValue="profile" className="space-y-6">
                             <TabsList>
-                                <TabsTrigger value="overview">
-                                    Overview
-                                </TabsTrigger>
                                 <TabsTrigger value="profile">
                                     Organiser Profile
                                 </TabsTrigger>
                                 <TabsTrigger value="events">Events</TabsTrigger>
                             </TabsList>
-
-                            <TabsContent value="overview" className="space-y-4">
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <Building2 className="h-4 w-4" />
-                                                Organisation
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-2xl font-bold">
-                                                {organiserProfile?.name ||
-                                                    'Not set'}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Organiser Name
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <CalendarDays className="h-4 w-4" />
-                                                Events
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-2xl font-bold">
-                                                0
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Total Events
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </TabsContent>
 
                             <TabsContent value="profile" className="space-y-4">
                                 <Card>
