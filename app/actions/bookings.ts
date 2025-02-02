@@ -11,6 +11,7 @@ interface CreateBookingData {
 
 interface BookingResult {
     error?: string;
+    redirect?: string;
 }
 
 export async function createBooking({
@@ -20,80 +21,117 @@ export async function createBooking({
     try {
         const supabase = await createClient();
 
-        // Getting the authenticated user
+        // Getting the user
         const {
             data: { user },
-            error: userError,
         } = await supabase.auth.getUser();
         if (!user) {
-            return encodedRedirect(
-                'error',
-                '/sign-in',
-                'Please sign in to book tickets'
-            );
+            console.error('User not authenticated');
+            return { error: 'Not authenticated' };
         }
 
-        // Getting the event details
         const { data: event, error: eventError } = await supabase
             .from('events')
             .select('*')
             .eq('id', eventId)
             .single();
 
-        if (eventError || !event) {
-            throw new Error('Event not found');
+        if (eventError) {
+            console.error('Event fetch error:', eventError);
+            return { error: 'Failed to fetch event details' };
         }
 
-        // Starting a transaction by creating the booking
-        const { data: booking, error: bookingError } = await supabase
-            .from('bookings')
-            .insert({
-                user_id: user.id,
+        if (!event) {
+            console.error('Event not found');
+            return { error: 'Event not found' };
+        }
+
+        // Check if there are enough tickets available
+        if (event.max_attendees !== null && event.max_attendees < quantity) {
+            return {
+                error: 'Not enough tickets available',
+            };
+        }
+
+        // For handling free events (price is null or 0)
+        if (!event.ticket_price || event.ticket_price === 0) {
+            console.log('Processing free event booking...');
+
+            const { data: booking, error: bookingError } = await supabase
+                .from('bookings')
+                .insert({
+                    user_id: user.id,
+                    event_id: eventId,
+                    status: 'confirmed',
+                    ticket_quantity: quantity,
+                    total_amount: 0,
+                })
+                .select()
+                .single();
+
+            if (bookingError) {
+                console.error('Booking creation error:', bookingError);
+                return { error: 'Failed to create booking' };
+            }
+
+            // Creating the tickets
+            const tickets = Array(quantity).fill({
+                booking_id: booking.id,
                 event_id: eventId,
-                status: event.is_free ? 'confirmed' : 'pending',
-                total_amount: event.is_free ? 0 : event.ticket_price * quantity,
-            })
-            .select()
-            .single();
+                user_id: user.id,
+                status: 'valid',
+                ticket_number: crypto.randomUUID(), // Generating a unique ticket number
+            });
 
-        if (bookingError) throw bookingError;
+            const { error: ticketsError } = await supabase
+                .from('tickets')
+                .insert(tickets);
 
-        // Creating tickets for the booking
-        const tickets = Array(quantity).fill({
-            booking_id: booking.id,
-            event_id: eventId,
-            user_id: user.id,
-            status: event.is_free ? 'valid' : 'pending',
-        });
+            if (ticketsError) throw ticketsError;
 
-        const { error: ticketsError } = await supabase
-            .from('tickets')
-            .insert(tickets);
+            // Updating max_attendees if it's not null
+            if (event.max_attendees !== null) {
+                const { error: updateError } = await supabase
+                    .from('events')
+                    .update({ max_attendees: event.max_attendees - quantity })
+                    .eq('id', eventId);
 
-        if (ticketsError) throw ticketsError;
+                if (updateError) throw updateError;
+            }
 
-        // Handling free events
-        if (event.is_free) {
             revalidatePath(`/events/${eventId}`);
             return encodedRedirect(
                 'success',
-                `/events/${eventId}`,
+                `/events/${eventId}/book/success?booking=${booking.id}`,
                 'Registration successful!'
             );
         }
 
-        // For paid events we then process to payment process
+        // For paid events - this will be handled by Stripe later
+        const { data: pendingBooking, error: pendingBookingError } =
+            await supabase
+                .from('bookings')
+                .insert({
+                    user_id: user.id,
+                    event_id: eventId,
+                    status: 'pending',
+                    ticket_quantity: quantity,
+                    total_amount: event.ticket_price * quantity,
+                })
+                .select()
+                .single();
+
+        if (pendingBookingError) throw pendingBookingError;
+
         return encodedRedirect(
             'success',
-            `/events/${eventId}/book/payment`,
+            `/events/${eventId}/book/payment?booking=${pendingBooking.id}`,
             'Proceeding to payment'
         );
     } catch (error) {
-        console.error('Booking error:', error);
-        return encodedRedirect(
-            'error',
-            `/events/${eventId}/book`,
-            'Failed to create booking'
-        );
+        console.error('Detailed booking error:', error);
+        return {
+            error: 'Failed to create booking',
+        };
     }
 }

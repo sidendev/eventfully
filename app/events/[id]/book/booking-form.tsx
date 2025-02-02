@@ -24,6 +24,11 @@ export function BookingForm({ event }: { event: any }) {
 
             if (result?.error) {
                 toast.error(result.error);
+                return;
+            }
+
+            if (result?.redirect) {
+                window.location.href = result.redirect;
             }
         } catch (error) {
             toast.error('Failed to create booking');
