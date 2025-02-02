@@ -146,82 +146,55 @@ CREATE TRIGGER update_organiser_profiles_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Row Level Security (RLS)
+-- Enable RLS on all tables
 ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.organiser_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_types ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
--- Events policies
+-- Simple policies for events (public viewing, authenticated users can create)
 CREATE POLICY "Events are viewable by everyone"
     ON public.events FOR SELECT
-    USING (
-        is_published = true OR 
-        EXISTS (
-            SELECT 1 FROM public.organiser_profiles
-            WHERE id = events.organiser_profile_id 
-            AND user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Events can be created by users with organiser profiles"
-    ON public.events FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.organiser_profiles
-            WHERE id = organiser_profile_id 
-            AND user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Events can be updated by organiser"
-    ON public.events FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.organiser_profiles
-            WHERE id = organiser_profile_id 
-            AND user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Events can be deleted by organiser"
-    ON public.events FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.organiser_profiles
-            WHERE id = organiser_profile_id 
-            AND user_id = auth.uid()
-        )
-    );
-
--- Bookings policies
-CREATE POLICY "Users can view their own bookings"
-    ON public.bookings FOR SELECT
-    USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can create their own bookings"
-    ON public.bookings FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
-
--- Organiser profiles policies
-CREATE POLICY "Organiser profiles are viewable by everyone"
-    ON public.organiser_profiles FOR SELECT
     USING (true);
 
-CREATE POLICY "Users can create their own organiser profile"
-    ON public.organiser_profiles FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Events can be managed by organiser"
+    ON public.events
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.organiser_profiles
+            WHERE id = organiser_profile_id 
+            AND user_id = auth.uid()
+        )
+    );
 
-CREATE POLICY "Users can update their own organiser profile"
-    ON public.organiser_profiles FOR UPDATE
-    USING (auth.uid() = user_id)
-    WITH CHECK (auth.uid() = user_id);
+-- Simple policies for locations (anyone can view, authenticated users can manage)
+CREATE POLICY "Locations are viewable by everyone"
+    ON public.locations FOR SELECT
+    USING (true);
 
-CREATE POLICY "Users can delete their own organiser profile"
-    ON public.organiser_profiles FOR DELETE
+CREATE POLICY "Authenticated users can manage locations"
+    ON public.locations
+    FOR ALL
+    USING (auth.role() = 'authenticated');
+
+-- Simple policies for profiles and organiser profiles
+CREATE POLICY "Profiles are viewable by everyone"
+    ON public.profiles FOR SELECT
+    USING (true);
+
+CREATE POLICY "Users can manage their own profile"
+    ON public.profiles
+    FOR ALL
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage their own organiser profile"
+    ON public.organiser_profiles 
+    FOR ALL
     USING (auth.uid() = user_id);
 
 -- policies for event_types
@@ -247,31 +220,59 @@ CREATE POLICY "Event types can be deleted by authenticated users"
     FOR DELETE
     USING (auth.role() = 'authenticated');
 
--- policies for tickets
+-- Improve tickets policies
+DROP POLICY IF EXISTS "Users can view their own tickets" ON public.tickets;
+DROP POLICY IF EXISTS "Users can only create tickets through bookings" ON public.tickets;
+
 CREATE POLICY "Users can view their own tickets"
     ON public.tickets FOR SELECT
     USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can only create tickets through bookings"
+CREATE POLICY "Event organisers can view tickets for their events"
+    ON public.tickets FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.events e
+            JOIN public.organiser_profiles op ON e.organiser_profile_id = op.id
+            WHERE e.id = tickets.event_id
+            AND op.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Tickets can be created through bookings"
     ON public.tickets FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (
+        auth.role() = 'authenticated' AND
+        EXISTS (
+            SELECT 1 FROM public.bookings
+            WHERE bookings.id = booking_id
+            AND bookings.user_id = auth.uid()
+        )
+    );
 
--- policies for locations
-CREATE POLICY "Locations are viewable by everyone"
-    ON public.locations FOR SELECT
-    USING (true);
-
--- INSERT policy for locations
-CREATE POLICY "Authenticated users can create locations"
-    ON public.locations
-    FOR INSERT
-    WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Event organisers can update ticket status"
+    ON public.tickets FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.events e
+            JOIN public.organiser_profiles op ON e.organiser_profile_id = op.id
+            WHERE e.id = tickets.event_id
+            AND op.user_id = auth.uid()
+        )
+    );
 
 -- event ratings policies:
-CREATE POLICY "Users can rate events they've booked"
+DROP POLICY IF EXISTS "Users can rate events they've booked" ON public.event_ratings;
+DROP POLICY IF EXISTS "Users can view all event ratings" ON public.event_ratings;
+
+CREATE POLICY "Event ratings are viewable by everyone"
+    ON public.event_ratings FOR SELECT
+    USING (true);
+
+CREATE POLICY "Users can create ratings for events they've booked"
     ON public.event_ratings FOR INSERT
     WITH CHECK (
-        auth.uid() = user_id AND
+        auth.role() = 'authenticated' AND
         EXISTS (
             SELECT 1 FROM public.bookings
             WHERE bookings.event_id = event_ratings.event_id
@@ -280,48 +281,14 @@ CREATE POLICY "Users can rate events they've booked"
         )
     );
 
-CREATE POLICY "Users can view all event ratings"
-    ON public.event_ratings FOR SELECT
-    USING (true);
-
--- profiles policies
-DROP POLICY IF EXISTS "Users can manage their own profile" ON public.profiles;
-
-CREATE POLICY "Profiles are viewable by everyone"
-    ON public.profiles FOR SELECT
-    USING (true);
-
-CREATE POLICY "Users can insert their own profile"
-    ON public.profiles FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own profile"
-    ON public.profiles FOR UPDATE
+CREATE POLICY "Users can update their own ratings"
+    ON public.event_ratings FOR UPDATE
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete their own profile"
-    ON public.profiles FOR DELETE
+CREATE POLICY "Users can delete their own ratings"
+    ON public.event_ratings FOR DELETE
     USING (auth.uid() = user_id);
-
--- organiser profiles policies
-CREATE POLICY "Users can manage their own organiser profile"
-    ON public.organiser_profiles 
-    FOR ALL USING (auth.uid() = user_id) 
-    WITH CHECK (auth.uid() = user_id);
-
--- Sample data (only keeping lookup tables data)
-INSERT INTO public.event_types (name, description) VALUES
-    ('Conference', 'Professional gathering for learning and networking'),
-    ('Workshop', 'Hands-on learning experience'),
-    ('Concert', 'Live music performance'),
-    ('Exhibition', 'Display of art, products, or ideas'),
-    ('Networking', 'Social gathering for professional connections');
-
-INSERT INTO public.locations (name, address, city, state, country, postal_code, venue_type) VALUES
-    ('Tech Hub', '123 Innovation Street', 'London', 'England', 'United Kingdom', 'EC1V 4PW', 'Conference Center'),
-    ('Creative Space', '456 Art Avenue', 'Manchester', 'England', 'United Kingdom', 'M1 1AD', 'Gallery'),
-    ('Music Hall', '789 Melody Lane', 'Birmingham', 'England', 'United Kingdom', 'B1 1BB', 'Concert Venue');
 
 -- indexes 
 CREATE INDEX idx_events_starts_at ON public.events(starts_at);
