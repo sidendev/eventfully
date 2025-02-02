@@ -8,6 +8,9 @@ import Link from 'next/link';
 import { Building2, PlusCircle, CalendarDays } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { updateOrganiserProfile } from '@/app/actions/organiser';
+import { SubmitButton } from '@/components/submit-button';
+import { UploadImage } from '@/components/upload-image';
 
 export default async function OrganiserPage() {
     const supabase = await createClient();
@@ -20,7 +23,6 @@ export default async function OrganiserPage() {
         return redirect('/sign-in');
     }
 
-    // implement this data fetching later
     const { data: organiserProfile } = await supabase
         .from('organiser_profiles')
         .select('*')
@@ -38,7 +40,8 @@ export default async function OrganiserPage() {
                                     Organiser Dashboard
                                 </h1>
                                 <p className="text-muted-foreground mt-2">
-                                    Manage your organiser profile and events
+                                    Manage your Event organiser profile and
+                                    events
                                 </p>
                             </div>
                             <Button asChild>
@@ -106,9 +109,35 @@ export default async function OrganiserPage() {
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>Organiser Profile</CardTitle>
+                                        <p className="text-sm text-muted-foreground mt-2">
+                                            Complete your organiser profile to
+                                            start creating and managing events.
+                                            This information will be visible to
+                                            event attendees.
+                                        </p>
                                     </CardHeader>
                                     <CardContent>
-                                        <form className="space-y-4">
+                                        {!organiserProfile?.name && (
+                                            <div className="mb-6 p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+                                                <p className="text-sm font-medium">
+                                                    ⚠️ Your organiser profile
+                                                    needs to be completed before
+                                                    you can create events.
+                                                </p>
+                                            </div>
+                                        )}
+                                        <form
+                                            action={updateOrganiserProfile}
+                                            className="space-y-4"
+                                        >
+                                            <UploadImage
+                                                defaultValue={
+                                                    organiserProfile?.profile_image_url
+                                                }
+                                                name="profile_image_url"
+                                                endpoint="organiserImage"
+                                            />
+
                                             <div className="space-y-2">
                                                 <Label htmlFor="name">
                                                     Organisation Name
@@ -116,10 +145,12 @@ export default async function OrganiserPage() {
                                                 <Input
                                                     id="name"
                                                     name="name"
-                                                    defaultValue={
-                                                        organiserProfile?.name
-                                                    }
                                                     placeholder="Your organisation name"
+                                                    defaultValue={
+                                                        organiserProfile?.name ||
+                                                        ''
+                                                    }
+                                                    required
                                                 />
                                             </div>
 
@@ -130,10 +161,11 @@ export default async function OrganiserPage() {
                                                 <Textarea
                                                     id="description"
                                                     name="description"
-                                                    defaultValue={
-                                                        organiserProfile?.description
-                                                    }
                                                     placeholder="Tell people about your organisation"
+                                                    defaultValue={
+                                                        organiserProfile?.description ||
+                                                        ''
+                                                    }
                                                 />
                                             </div>
 
@@ -146,7 +178,8 @@ export default async function OrganiserPage() {
                                                     name="website_url"
                                                     type="url"
                                                     defaultValue={
-                                                        organiserProfile?.website_url
+                                                        organiserProfile?.website_url ||
+                                                        ''
                                                     }
                                                     placeholder="https://your-website.com"
                                                 />
@@ -161,15 +194,18 @@ export default async function OrganiserPage() {
                                                     name="contact_email"
                                                     type="email"
                                                     defaultValue={
-                                                        organiserProfile?.contact_email
+                                                        organiserProfile?.contact_email ||
+                                                        ''
                                                     }
                                                     placeholder="contact@your-organisation.com"
                                                 />
                                             </div>
 
-                                            <Button type="submit">
-                                                Save Changes
-                                            </Button>
+                                            <div className="flex justify-end">
+                                                <SubmitButton pendingText="Saving Changes...">
+                                                    Save Changes
+                                                </SubmitButton>
+                                            </div>
                                         </form>
                                     </CardContent>
                                 </Card>

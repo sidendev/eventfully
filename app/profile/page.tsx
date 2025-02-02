@@ -49,6 +49,7 @@ export default async function ProfilePage() {
                                 <UploadImage
                                     defaultValue={profile?.avatar_url}
                                     name="avatar_url"
+                                    endpoint="profileImage"
                                 />
 
                                 <div className="space-y-2">
