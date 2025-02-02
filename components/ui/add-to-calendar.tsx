@@ -39,14 +39,23 @@ export function AddToCalendar({ event, className }: AddToCalendarProps) {
         name: event.title,
         description: event.description,
         location,
-        options: ['Google'],
+        options: [
+            'Google',
+            'Apple',
+            'iCal',
+            'Microsoft365',
+            'MicrosoftTeams',
+            'Outlook.com',
+            'Yahoo',
+        ],
         timeZone: 'Europe/London',
         buttonStyle: 'date',
         lightMode: 'system',
-        hideIconButton: true,
-        hideCheckmark: true,
+        hideIconButton: false,
+        hideCheckmark: false,
         size: '3',
         label: 'Add to Calendar',
+        hideTextLabelButton: false,
         styleLight: `
             --btn-background: hsl(var(--primary));
             --btn-text: hsl(var(--primary-foreground));
