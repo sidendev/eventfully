@@ -351,17 +351,6 @@ create policy "Users can view their own bookings"
     to authenticated
     using (auth.uid() = user_id);
 
--- Ticket Policies
-create policy "Users can create their own tickets"
-    on public.tickets for insert
-    to authenticated
-    with check (auth.uid() = user_id);
-
-create policy "Users can view their own tickets"
-    on public.tickets for select
-    to authenticated
-    using (auth.uid() = user_id);
-
 -- Event Policies
 create policy "Anyone can view published events"
     on public.events for select
