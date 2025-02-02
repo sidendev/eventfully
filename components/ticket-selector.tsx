@@ -9,18 +9,22 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
 
 interface TicketSelectorProps {
     event: {
         is_free: boolean;
         ticket_price: number;
     };
+    quantity: string;
+    onQuantityChange: (value: string) => void;
 }
 
-export function TicketSelector({ event }: TicketSelectorProps) {
-    const [quantity, setQuantity] = useState('1');
-    const maxTickets = 10; // need make this dynamic later based on available tickets
+export function TicketSelector({
+    event,
+    quantity,
+    onQuantityChange,
+}: TicketSelectorProps) {
+    const maxTickets = 10;
 
     return (
         <Card>
@@ -30,7 +34,7 @@ export function TicketSelector({ event }: TicketSelectorProps) {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="quantity">Number of Tickets</Label>
-                    <Select value={quantity} onValueChange={setQuantity}>
+                    <Select value={quantity} onValueChange={onQuantityChange}>
                         <SelectTrigger id="quantity">
                             <SelectValue placeholder="Select quantity" />
                         </SelectTrigger>
