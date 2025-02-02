@@ -6,7 +6,7 @@ import {
 } from 'add-to-calendar-button-react';
 import { isSameDay, parseISO } from 'date-fns';
 
-interface Event {
+export interface Event {
     title: string;
     description?: string;
     starts_at: string;
@@ -19,22 +19,20 @@ interface Event {
     };
 }
 
-interface AddToCalendarProps {
+export interface AddToCalendarProps {
     event: Event;
     className?: string;
 }
 
-export function AddToCalendar({ event, className }: AddToCalendarProps) {
+const AddToCalendar = ({ event, className }: AddToCalendarProps) => {
     const startDate = parseISO(event.starts_at);
     const endDate = parseISO(event.ends_at);
     const isSingleDay = isSameDay(startDate, endDate);
 
-    // Format location string
     const location = event.locations
         ? `${event.locations.name}${event.locations.address ? `, ${event.locations.address}` : ''}, ${event.locations.city}`
         : '';
 
-    // Common props with correct typing
     const commonProps: Partial<AddToCalendarButtonType> = {
         name: event.title,
         description: event.description,
@@ -59,6 +57,7 @@ export function AddToCalendar({ event, className }: AddToCalendarProps) {
         listStyle: 'overlay',
         trigger: 'click',
         hideBranding: true,
+        debug: false,
         styleLight: `
             --btn-background: hsl(var(--primary));
             --btn-text: hsl(var(--primary-foreground));
@@ -76,7 +75,9 @@ export function AddToCalendar({ event, className }: AddToCalendarProps) {
             --btn-radius: 9999px;
             --list-radius: 0.5rem;
             --btn-padding: 8px 16px;
-            --z-index: 100;
+            --z-index: 50;
+            --list-z-index: 9999;
+            --list-position: fixed; 
         `,
         styleDark: `
             --btn-background: hsl(var(--primary));
@@ -89,6 +90,8 @@ export function AddToCalendar({ event, className }: AddToCalendarProps) {
             --list-text: hsl(var(--foreground));
             --list-background-hover: hsl(var(--accent));
             --list-text-hover: hsl(var(--accent-foreground));
+            --z-index: 50;
+            --list-z-index: 9999;
         `,
     };
 
@@ -129,4 +132,6 @@ export function AddToCalendar({ event, className }: AddToCalendarProps) {
             endTime={endDate.toISOString().split('T')[1].substring(0, 5)}
         />
     );
-}
+};
+
+export default AddToCalendar;

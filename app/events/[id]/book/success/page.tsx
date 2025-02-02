@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
-import { AddToCalendar } from '@/components/ui/add-to-calendar';
+import { AddToCalendar } from '@/components/ui/add-to-calendar-wrapper';
 
 export default async function BookingSuccessPage({
     params,
