@@ -133,10 +133,12 @@ export default async function EventPage({ params }: EventPageProps) {
                                     </div>
                                 </div>
 
-                                <Button className="w-full" size="lg">
-                                    {event.is_free
-                                        ? 'Register Now'
-                                        : `Book Now - £${event.ticket_price}`}
+                                <Button asChild className="w-full" size="lg">
+                                    <Link href={`/events/${event.id}/book`}>
+                                        {event.is_free
+                                            ? 'Register Now'
+                                            : `Book Now - £${event.ticket_price}`}
+                                    </Link>
                                 </Button>
 
                                 <Button
