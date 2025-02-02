@@ -290,6 +290,44 @@ CREATE POLICY "Users can delete their own ratings"
     ON public.event_ratings FOR DELETE
     USING (auth.uid() = user_id);
 
+-- Booking Policies
+create policy "Users can create their own bookings"
+    on public.bookings for insert
+    to authenticated
+    with check (auth.uid() = user_id);
+
+create policy "Users can view their own bookings"
+    on public.bookings for select
+    to authenticated
+    using (auth.uid() = user_id);
+
+-- Payment Related Policies
+create policy "Users can update their own pending bookings"
+    on public.bookings
+    FOR UPDATE
+    TO authenticated
+    USING (auth.uid() = user_id AND status = 'pending')
+    WITH CHECK (auth.uid() = user_id);
+
+create policy "Users can view their own payment intents"
+    on public.bookings
+    FOR SELECT
+    TO authenticated
+    USING (auth.uid() = user_id AND payment_intent_id IS NOT NULL);
+
+-- Allowing updating max_attendees for confirmed bookings
+create policy "Update max_attendees on booking confirmation"
+    on public.events for update
+    to authenticated
+    using (true)
+    with check (
+        exists (
+            select 1 from public.bookings
+            where bookings.event_id = events.id
+            and bookings.status in ('confirmed', 'pending')
+        )
+    );    
+
 -- indexes 
 CREATE INDEX idx_events_starts_at ON public.events(starts_at);
 CREATE INDEX idx_events_is_published ON public.events(is_published);
@@ -340,100 +378,4 @@ CREATE TRIGGER update_profiles_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Booking Policies
-create policy "Users can create their own bookings"
-    on public.bookings for insert
-    to authenticated
-    with check (auth.uid() = user_id);
 
-create policy "Users can view their own bookings"
-    on public.bookings for select
-    to authenticated
-    using (auth.uid() = user_id);
-
--- Event Policies
-create policy "Anyone can view published events"
-    on public.events for select
-    using (is_published = true);
-
-create policy "Organisers can view their own events"
-    on public.events for select
-    to authenticated
-    using (
-        exists (
-            select 1 from public.organiser_profiles
-            where id = events.organiser_profile_id
-            and user_id = auth.uid()
-        )
-    );
-
-create policy "Organisers can update their own events"
-    on public.events for update
-    to authenticated
-    using (
-        exists (
-            select 1 from public.organiser_profiles
-            where id = events.organiser_profile_id
-            and user_id = auth.uid()
-        )
-    );
-
-create policy "Organisers can delete their own events"
-    on public.events for delete
-    to authenticated
-    using (
-        exists (
-            select 1 from public.organiser_profiles
-            where id = events.organiser_profile_id
-            and user_id = auth.uid()
-        )
-    );
-
--- Event Ratings Policies
-create policy "Anyone can view event ratings"
-    on public.event_ratings for select
-    using (true);
-
-create policy "Users can rate events they've booked"
-    on public.event_ratings for insert
-    to authenticated
-    with check (
-        exists (
-            select 1 from public.bookings
-            where bookings.event_id = event_ratings.event_id
-            and bookings.user_id = auth.uid()
-            and bookings.status = 'confirmed'
-        )
-    );
-
-create policy "Users can delete their own ratings"
-    on public.event_ratings for delete
-    to authenticated
-    using (user_id = auth.uid());
-
--- Payment Related Policies
-create policy "Users can update their own pending bookings"
-    on public.bookings
-    FOR UPDATE
-    TO authenticated
-    USING (auth.uid() = user_id AND status = 'pending')
-    WITH CHECK (auth.uid() = user_id);
-
-create policy "Users can view their own payment intents"
-    on public.bookings
-    FOR SELECT
-    TO authenticated
-    USING (auth.uid() = user_id AND payment_intent_id IS NOT NULL);
-
--- Allowing updating max_attendees for confirmed bookings
-create policy "Update max_attendees on booking confirmation"
-    on public.events for update
-    to authenticated
-    using (true)
-    with check (
-        exists (
-            select 1 from public.bookings
-            where bookings.event_id = events.id
-            and bookings.status in ('confirmed', 'pending')
-        )
-    );
