@@ -156,7 +156,7 @@ ALTER TABLE public.organiser_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_types ENABLE ROW LEVEL SECURITY;
 
--- Simple policies for events (public viewing, authenticated users can create)
+-- policies for events (public viewing, authenticated users can create)
 CREATE POLICY "Events are viewable by everyone"
     ON public.events FOR SELECT
     USING (true);
@@ -172,7 +172,7 @@ CREATE POLICY "Events can be managed by organiser"
         )
     );
 
--- Simple policies for locations (anyone can view, authenticated users can manage)
+-- policies for locations (anyone can view, authenticated users can manage)
 CREATE POLICY "Locations are viewable by everyone"
     ON public.locations FOR SELECT
     USING (true);
@@ -182,7 +182,7 @@ CREATE POLICY "Authenticated users can manage locations"
     FOR ALL
     USING (auth.role() = 'authenticated');
 
--- Simple policies for profiles and organiser profiles
+-- policies for profiles and organiser profiles
 CREATE POLICY "Profiles are viewable by everyone"
     ON public.profiles FOR SELECT
     USING (true);
@@ -220,7 +220,7 @@ CREATE POLICY "Event types can be deleted by authenticated users"
     FOR DELETE
     USING (auth.role() = 'authenticated');
 
--- Improve tickets policies
+-- tickets policies
 DROP POLICY IF EXISTS "Users can view their own tickets" ON public.tickets;
 DROP POLICY IF EXISTS "Users can only create tickets through bookings" ON public.tickets;
 
@@ -334,7 +334,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Add trigger for profiles table to handle updated_at
+-- Trigger for profiles table to handle updated_at
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON public.profiles
     FOR EACH ROW

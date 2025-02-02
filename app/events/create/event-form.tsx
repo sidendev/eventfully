@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { useEventForm } from '@/components/event-form';
 import { cn } from '@/lib/utils';
 import { LocationDialog } from '@/components/location-dialog';
+import { EventTypeDialog } from '@/components/event-type-dialog';
 
 interface EventFormProps {
     eventTypes: { id: string; name: string }[];
@@ -46,6 +47,12 @@ export function EventForm({ eventTypes, locations }: EventFormProps) {
     // function to refresh locations
     const handleLocationCreated = () => {
         // This should trigger a server refetch of the locations
+        window.location.reload();
+    };
+
+    // Add this function to refresh event types
+    const handleEventTypeCreated = () => {
+        // This will trigger a server refetch of the event types
         window.location.reload();
     };
 
@@ -123,12 +130,12 @@ export function EventForm({ eventTypes, locations }: EventFormProps) {
                                 <CardContent className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <Label htmlFor="type">
-                                                Event Type
+                                            <Label htmlFor="type_id">
+                                                Event Type *
                                             </Label>
                                             <Select name="type_id" required>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select event type" />
+                                                    <SelectValue placeholder="Select an event type" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {eventTypes?.map((type) => (
@@ -141,6 +148,11 @@ export function EventForm({ eventTypes, locations }: EventFormProps) {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
+                                            <EventTypeDialog
+                                                onEventTypeCreated={
+                                                    handleEventTypeCreated
+                                                }
+                                            />
                                         </div>
 
                                         <div className="space-y-2">
