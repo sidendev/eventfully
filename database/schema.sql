@@ -261,6 +261,12 @@ CREATE POLICY "Locations are viewable by everyone"
     ON public.locations FOR SELECT
     USING (true);
 
+-- INSERT policy for locations
+CREATE POLICY "Authenticated users can create locations"
+    ON public.locations
+    FOR INSERT
+    WITH CHECK (auth.role() = 'authenticated');
+
 -- event ratings policies:
 CREATE POLICY "Users can rate events they've booked"
     ON public.event_ratings FOR INSERT
