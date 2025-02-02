@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
+import { AddToCalendar } from '@/components/ui/add-to-calendar';
 
 export default async function BookingSuccessPage({
     params,
@@ -132,10 +133,7 @@ export default async function BookingSuccessPage({
                             <Button asChild>
                                 <Link href="/my-events">View My Events</Link>
                             </Button>
-                            <Button variant="outline">
-                                <CalendarPlus className="mr-2 h-4 w-4" />
-                                Add to Calendar
-                            </Button>
+                            <AddToCalendar event={event} />
                         </div>
                     </CardContent>
                 </Card>
