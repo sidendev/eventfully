@@ -49,22 +49,46 @@ export function AddToCalendar({ event, className }: AddToCalendarProps) {
             'Yahoo',
         ],
         timeZone: 'Europe/London',
-        buttonStyle: 'date',
+        buttonStyle: 'round',
         lightMode: 'system',
         hideIconButton: false,
         hideCheckmark: false,
         size: '3',
         label: 'Add to Calendar',
         hideTextLabelButton: false,
+        listStyle: 'overlay',
+        trigger: 'click',
+        hideBranding: true,
         styleLight: `
             --btn-background: hsl(var(--primary));
             --btn-text: hsl(var(--primary-foreground));
-            --btn-shadow: transparent;
-            --btn-shadow-hover: transparent;
-            --btn-shadow-active: transparent;
+            --btn-shadow: none;
+            --btn-shadow-hover: none;
+            --btn-shadow-active: none;
+            --list-shadow: none;
             --list-background: hsl(var(--background));
             --list-text: hsl(var(--foreground));
             --list-item-hover: hsl(var(--accent));
+            --list-background-hover: hsl(var(--accent));
+            --list-text-hover: hsl(var(--accent-foreground));
+            --font: var(--font-sans);
+            --btn-border: 0;
+            --btn-radius: 9999px;
+            --list-radius: 0.5rem;
+            --btn-padding: 8px 16px;
+            --z-index: 100;
+        `,
+        styleDark: `
+            --btn-background: hsl(var(--primary));
+            --btn-text: hsl(var(--primary-foreground));
+            --btn-shadow: none;
+            --btn-shadow-hover: none;
+            --btn-shadow-active: none;
+            --list-shadow: none;
+            --list-background: hsl(var(--background));
+            --list-text: hsl(var(--foreground));
+            --list-background-hover: hsl(var(--accent));
+            --list-text-hover: hsl(var(--accent-foreground));
         `,
     };
 
