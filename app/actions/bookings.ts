@@ -12,6 +12,7 @@ interface CreateBookingData {
 interface BookingResult {
     error?: string;
     redirect?: string;
+    message?: string;
 }
 
 export async function createBooking({
@@ -57,6 +58,7 @@ export async function createBooking({
         if (!event.ticket_price || event.ticket_price === 0) {
             console.log('Processing free event booking...');
 
+            // Create booking first
             const { data: booking, error: bookingError } = await supabase
                 .from('bookings')
                 .insert({
@@ -74,20 +76,27 @@ export async function createBooking({
                 return { error: 'Failed to create booking' };
             }
 
-            // Creating the tickets
-            const tickets = Array(quantity).fill({
+            console.log('Booking created successfully:', booking);
+
+            const tickets = Array.from({ length: quantity }, () => ({
                 booking_id: booking.id,
                 event_id: eventId,
                 user_id: user.id,
-                status: 'valid',
-                ticket_number: crypto.randomUUID(), // Generating a unique ticket number
-            });
+                ticket_number: crypto.randomUUID(),
+                is_scanned: false,
+            }));
 
             const { error: ticketsError } = await supabase
                 .from('tickets')
                 .insert(tickets);
 
-            if (ticketsError) throw ticketsError;
+            if (ticketsError) {
+                console.error('Tickets creation error:', ticketsError);
+                await supabase.from('bookings').delete().eq('id', booking.id);
+                return { error: 'Failed to create tickets' };
+            }
+
+            console.log('Tickets created successfully');
 
             // Updating max_attendees if it's not null
             if (event.max_attendees !== null) {
@@ -96,15 +105,20 @@ export async function createBooking({
                     .update({ max_attendees: event.max_attendees - quantity })
                     .eq('id', eventId);
 
-                if (updateError) throw updateError;
+                if (updateError) {
+                    console.error('Error updating max_attendees:', updateError);
+                    throw updateError;
+                }
             }
 
-            revalidatePath(`/events/${eventId}`);
-            return encodedRedirect(
-                'success',
-                `/events/${eventId}/book/success?booking=${booking.id}`,
-                'Registration successful!'
-            );
+            console.log('Redirecting to success page...');
+            const redirectUrl = `/events/${eventId}/book/success?booking=${booking.id}`;
+            console.log('Redirect URL:', redirectUrl);
+
+            return {
+                redirect: redirectUrl,
+                message: 'Registration successful!',
+            };
         }
 
         // For paid events - this will be handled by Stripe later

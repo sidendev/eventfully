@@ -19,6 +19,9 @@ export default async function BookingSuccessPage({
     params: { id: string };
     searchParams: { booking: string };
 }) {
+    console.log('Success page params:', params);
+    console.log('Success page searchParams:', searchParams);
+
     const supabase = await createClient();
 
     // Getting booking with related data
@@ -39,7 +42,13 @@ export default async function BookingSuccessPage({
         .eq('id', searchParams.booking)
         .single();
 
-    if (bookingError || !booking) {
+    if (bookingError) {
+        console.error('Error fetching booking:', bookingError);
+        notFound();
+    }
+
+    if (!booking) {
+        console.error('No booking found');
         notFound();
     }
 
