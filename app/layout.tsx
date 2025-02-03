@@ -1,6 +1,5 @@
 import HeaderAuth from '@/components/header-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { hasEnvVars } from '@/utils/supabase/check-env-vars';
 import { createClient } from '@/utils/supabase/server';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
@@ -103,7 +102,7 @@ export default async function RootLayout({
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <ThemeSwitcher />
-                                            {hasEnvVars && <HeaderAuth />}
+                                            <HeaderAuth />
                                         </div>
                                     </div>
                                 </div>
