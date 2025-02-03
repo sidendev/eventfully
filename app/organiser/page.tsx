@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { updateOrganiserProfile } from '@/app/actions/organiser';
 import { SubmitButton } from '@/components/submit-button';
 import { UploadImage } from '@/components/upload-image';
+import { OrganiserEventListItem } from '@/components/organiser-event-list-item';
 
 export default async function OrganiserPage() {
     const supabase = await createClient();
@@ -28,6 +29,36 @@ export default async function OrganiserPage() {
         .select('*')
         .eq('user_id', user.id)
         .single();
+
+    const { data: organiserEvents, error: eventsError } = await supabase
+        .from('events')
+        .select(
+            `
+            *,
+            locations (*),
+            event_types (*),
+            bookings (
+                id,
+                status
+            )
+        `
+        )
+        .eq('organiser_profile_id', organiserProfile.id)
+        .order('starts_at', { ascending: true });
+
+    if (eventsError) {
+        console.error('Error fetching events:', eventsError);
+        return <div>Failed to load events</div>;
+    }
+
+    const eventsWithStats = organiserEvents?.map((event) => ({
+        ...event,
+        confirmedBookings:
+            event.bookings?.filter(
+                (b: { status: string }) => b.status === 'confirmed'
+            ).length || 0,
+        totalBookings: event.bookings?.length || 0,
+    }));
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -172,19 +203,37 @@ export default async function OrganiserPage() {
                             <TabsContent value="events" className="space-y-4">
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Your Events</CardTitle>
+                                        <CardTitle>
+                                            Your Organised Events
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-center py-6">
-                                            <p className="text-muted-foreground">
-                                                No events created yet
-                                            </p>
-                                            <Button asChild className="mt-4">
-                                                <Link href="/events/create">
-                                                    Create Your First Event
-                                                </Link>
-                                            </Button>
-                                        </div>
+                                        {organiserEvents?.length === 0 ? (
+                                            <div className="text-center py-6">
+                                                <p className="text-muted-foreground">
+                                                    No events created yet
+                                                </p>
+                                                <Button
+                                                    asChild
+                                                    className="mt-4"
+                                                >
+                                                    <Link href="/events/create">
+                                                        Create Your First Event
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {eventsWithStats?.map(
+                                                    (event) => (
+                                                        <OrganiserEventListItem
+                                                            key={event.id}
+                                                            event={event}
+                                                        />
+                                                    )
+                                                )}
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </TabsContent>

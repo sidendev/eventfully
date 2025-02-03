@@ -132,3 +132,66 @@ export async function createEvent(formData: FormData) {
         );
     }
 }
+
+export async function deleteEvent(eventId: string) {
+    const supabase = await createClient();
+
+    try {
+        // Check if user is authorized
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+            throw new Error('Unauthorized');
+        }
+
+        // Get user's organiser profile
+        const { data: organiserProfile, error: profileError } = await supabase
+            .from('organiser_profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+        if (profileError) {
+            console.error('Profile error:', profileError);
+            throw new Error('Failed to get organiser profile');
+        }
+
+        if (!organiserProfile) {
+            throw new Error('Organiser profile not found');
+        }
+
+        // Verify the event belongs to this organiser
+        const { data: event, error: eventError } = await supabase
+            .from('events')
+            .select('organiser_profile_id')
+            .eq('id', eventId)
+            .single();
+
+        if (eventError) {
+            console.error('Event error:', eventError);
+            throw new Error('Failed to get event');
+        }
+
+        if (!event || event.organiser_profile_id !== organiserProfile.id) {
+            throw new Error('Unauthorized: Event not found or access denied');
+        }
+
+        // Start a transaction to delete event and related data
+        const { error: deleteError } = await supabase.rpc('delete_event', {
+            event_id: eventId,
+            user_id: user.id,
+        });
+
+        if (deleteError) {
+            console.error('Delete error:', deleteError);
+            throw new Error(`Failed to delete event: ${deleteError.message}`);
+        }
+
+        // Revalidate the organiser page
+        revalidatePath('/organiser');
+    } catch (error) {
+        console.error('Delete event error:', error);
+        throw error;
+    }
+}

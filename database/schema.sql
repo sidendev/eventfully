@@ -366,6 +366,39 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Function to delete an event and related data
+create or replace function delete_event(event_id uuid, user_id uuid)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+    _event_exists boolean;
+begin
+    -- Check if the event belongs to the user's organiser profile
+    select exists (
+        select 1 
+        from events e
+        join organiser_profiles op on op.id = e.organiser_profile_id
+        where e.id = delete_event.event_id 
+        and op.user_id = delete_event.user_id
+    ) into _event_exists;
+    
+    if not _event_exists then
+        raise exception 'Unauthorized: Event not found or not owned by user';
+    end if;
+
+    -- Delete bookings first
+    delete from bookings where event_id = delete_event.event_id;
+    
+    -- Delete tickets
+    delete from tickets where event_id = delete_event.event_id;
+    
+    -- Finally delete the event
+    delete from events where id = delete_event.event_id;
+end;
+$$;
+
 -- Triggers the function every time a user is created
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
