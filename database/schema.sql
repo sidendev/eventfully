@@ -411,4 +411,89 @@ CREATE TRIGGER update_profiles_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Function to cancel an event
+create or replace function cancel_event(event_id uuid, user_id uuid)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+    _event_exists boolean;
+begin
+    -- Check if the event belongs to the user's organiser profile
+    select exists (
+        select 1 
+        from events e
+        join organiser_profiles op on op.id = e.organiser_profile_id
+        where e.id = cancel_event.event_id 
+        and op.user_id = cancel_event.user_id
+    ) into _event_exists;
+    
+    if not _event_exists then
+        raise exception 'Unauthorized: Event not found or not owned by user';
+    end if;
+
+    -- Update the event to unpublish it
+    update events 
+    set 
+        is_published = false,
+        updated_at = TIMEZONE('utc'::text, NOW())
+    where id = cancel_event.event_id;
+end;
+$$;
+
+-- Function to update an event
+create or replace function update_event(
+    event_id uuid,
+    user_id uuid,
+    title text,
+    short_description text,
+    full_description text,
+    image_url text,
+    type_id uuid,
+    location_id uuid,
+    max_attendees integer,
+    ticket_price decimal,
+    starts_at timestamp with time zone,
+    ends_at timestamp with time zone
+)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+    _event_exists boolean;
+begin
+    -- Check if the event belongs to the user's organiser profile
+    select exists (
+        select 1 
+        from events e
+        join organiser_profiles op on op.id = e.organiser_profile_id
+        where e.id = update_event.event_id 
+        and op.user_id = update_event.user_id
+        and e.is_published = true
+    ) into _event_exists;
+    
+    if not _event_exists then
+        raise exception 'Unauthorized: Event not found, not owned by user, or cancelled';
+    end if;
+
+    -- Update the event
+    update events 
+    set 
+        title = update_event.title,
+        short_description = update_event.short_description,
+        full_description = update_event.full_description,
+        image_url = update_event.image_url,
+        type_id = update_event.type_id,
+        location_id = update_event.location_id,
+        max_attendees = update_event.max_attendees,
+        ticket_price = update_event.ticket_price,
+        starts_at = update_event.starts_at,
+        ends_at = update_event.ends_at,
+        updated_at = TIMEZONE('utc'::text, NOW())
+    where id = update_event.event_id;
+end;
+$$;
+
 

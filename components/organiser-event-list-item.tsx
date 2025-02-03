@@ -19,7 +19,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { deleteEvent } from '@/app/actions/events';
+import { cancelEvent } from '@/app/actions/events';
+import { cn } from '@/lib/utils';
 
 interface Event {
     id: string;
@@ -51,16 +52,21 @@ interface OrganiserEventListItemProps {
 export function OrganiserEventListItem({ event }: OrganiserEventListItemProps) {
     const isUpcoming = isAfter(new Date(event.starts_at), new Date());
 
-    const handleDelete = async () => {
+    const handleCancel = async () => {
         try {
-            await deleteEvent(event.id);
+            await cancelEvent(event.id);
         } catch (error) {
-            console.error('Error deleting event:', error);
+            console.error('Error cancelling event:', error);
         }
     };
 
     return (
-        <Card className="hover:shadow-md transition-shadow">
+        <Card
+            className={cn(
+                'hover:shadow-md transition-shadow',
+                !event.is_published && 'opacity-75'
+            )}
+        >
             <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 overflow-visible">
                     <Link
@@ -85,12 +91,24 @@ export function OrganiserEventListItem({ event }: OrganiserEventListItemProps) {
                     </Link>
 
                     <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Badge
-                                variant={isUpcoming ? 'default' : 'secondary'}
-                            >
-                                {isUpcoming ? 'Upcoming' : 'Past'}
-                            </Badge>
+                        <div className="flex items-center gap-2 mb-1">
+                            {event.is_published && (
+                                <Badge
+                                    variant={
+                                        isUpcoming ? 'default' : 'secondary'
+                                    }
+                                >
+                                    {isUpcoming ? 'Upcoming' : 'Past'}
+                                </Badge>
+                            )}
+                            {!event.is_published && (
+                                <Badge
+                                    variant="destructive"
+                                    className="border-2 border-destructive"
+                                >
+                                    Cancelled
+                                </Badge>
+                            )}
                             {event.event_types?.name && (
                                 <Badge variant="outline">
                                     {event.event_types.name}
@@ -123,19 +141,12 @@ export function OrganiserEventListItem({ event }: OrganiserEventListItemProps) {
                                             ? 'Free'
                                             : `£${event.ticket_price}`}
                                     </Badge>
-                                    {event.is_published ? (
+                                    {event.is_published && (
                                         <Badge
                                             variant="secondary"
                                             className="text-xs"
                                         >
                                             Published
-                                        </Badge>
-                                    ) : (
-                                        <Badge
-                                            variant="outline"
-                                            className="text-xs"
-                                        >
-                                            Draft
                                         </Badge>
                                     )}
                                 </div>
@@ -158,41 +169,54 @@ export function OrganiserEventListItem({ event }: OrganiserEventListItemProps) {
                     </div>
 
                     <div className="flex sm:flex-col gap-2 mt-4 sm:mt-0">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/events/${event.id}/edit`}>
+                        {event.is_published ? (
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={`/events/${event.id}/edit`}>
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Edit event</span>
+                                </Link>
+                            </Button>
+                        ) : (
+                            <Button variant="outline" size="sm" disabled>
                                 <Pencil className="h-4 w-4" />
                                 <span className="sr-only">Edit event</span>
-                            </Link>
-                        </Button>
+                            </Button>
+                        )}
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!event.is_published}
+                                >
                                     <Trash2 className="h-4 w-4 text-destructive" />
                                     <span className="sr-only">
-                                        Delete event
+                                        Cancel event
                                     </span>
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                        Delete Event
+                                        Cancel Event
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Are you sure you want to delete this
+                                        Are you sure you want to cancel this
                                         event? This action cannot be undone and
-                                        will cancel all existing bookings.
+                                        will notify all ticket holders. The
+                                        event will be marked as cancelled and no
+                                        new bookings will be allowed.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>
-                                        Cancel
+                                        Keep Event Active
                                     </AlertDialogCancel>
                                     <AlertDialogAction
-                                        onClick={handleDelete}
+                                        onClick={handleCancel}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
-                                        Delete
+                                        Cancel Event
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>

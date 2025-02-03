@@ -195,3 +195,121 @@ export async function deleteEvent(eventId: string) {
         throw error;
     }
 }
+
+export async function cancelEvent(eventId: string) {
+    const supabase = await createClient();
+
+    try {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+            throw new Error('Unauthorized');
+        }
+
+        const { error: cancelError } = await supabase.rpc('cancel_event', {
+            event_id: eventId,
+            user_id: user.id,
+        });
+
+        if (cancelError) {
+            console.error('Cancel error:', cancelError);
+            throw new Error(`Failed to cancel event: ${cancelError.message}`);
+        }
+
+        revalidatePath('/organiser');
+    } catch (error) {
+        console.error('Cancel event error:', error);
+        throw error;
+    }
+}
+
+export async function updateEvent(formData: FormData) {
+    try {
+        const supabase = await createClient();
+
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            return encodedRedirect('error', '/sign-in', 'Not authenticated');
+        }
+
+        // Getting form data
+        const eventId = formData.get('id') as string;
+        const title = formData.get('title') as string;
+        const short_description = formData.get('short_description') as string;
+        const full_description = formData.get('full_description') as string;
+        const image_url = formData.get('image_url') as string;
+        const type_id = formData.get('type_id') as string;
+        const location_id = formData.get('location_id') as string;
+        const max_attendees = formData.get('max_attendees') as string;
+        const is_free = formData.get('is_free') === 'true';
+        const ticket_price = formData.get('ticket_price') as string;
+        const starts_at = formData.get('starts_at') as string;
+        const ends_at = formData.get('ends_at') as string;
+
+        // Validation checks
+        if (
+            !title ||
+            !short_description ||
+            !full_description ||
+            !starts_at ||
+            !ends_at
+        ) {
+            return encodedRedirect(
+                'error',
+                `/events/${eventId}/edit`,
+                'Please fill in all required fields'
+            );
+        }
+
+        const startDate = new Date(starts_at);
+        const endDate = new Date(ends_at);
+
+        if (startDate >= endDate) {
+            return encodedRedirect(
+                'error',
+                `/events/${eventId}/edit`,
+                'End date must be after start date'
+            );
+        }
+
+        // Update the event using RPC function
+        const { error: updateError } = await supabase.rpc('update_event', {
+            event_id: eventId,
+            user_id: user.id,
+            title,
+            short_description,
+            full_description,
+            image_url,
+            type_id,
+            location_id,
+            max_attendees: max_attendees ? parseInt(max_attendees) : null,
+            ticket_price: is_free ? 0 : parseFloat(ticket_price),
+            starts_at: startDate.toISOString(),
+            ends_at: endDate.toISOString(),
+        });
+
+        if (updateError) {
+            console.error('Update event error:', updateError);
+            return encodedRedirect(
+                'error',
+                `/events/${eventId}/edit`,
+                'Failed to update event'
+            );
+        }
+
+        revalidatePath('/organiser');
+        revalidatePath(`/events/${eventId}`);
+        return encodedRedirect(
+            'success',
+            '/organiser',
+            'Event updated successfully'
+        );
+    } catch (error) {
+        console.error('Event update error:', error);
+        return encodedRedirect('error', '/organiser', 'Failed to update event');
+    }
+}
