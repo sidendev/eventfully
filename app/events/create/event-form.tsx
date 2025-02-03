@@ -27,6 +27,7 @@ import { DateTimePicker } from '@/components/date-time-picker';
 import { SubmitButton } from '@/components/submit-button';
 import { EventTypeDialog } from '@/components/event-type-dialog';
 import { LocationDialog } from '@/components/location-dialog';
+import { Switch } from '@/components/ui/switch';
 
 interface EventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
@@ -220,15 +221,11 @@ export function EventForm({
 
                             <div className="space-y-4">
                                 <div className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
+                                    <Switch
                                         id="is_free"
                                         name="is_free"
                                         checked={isFree}
-                                        onChange={(e) =>
-                                            setIsFree(e.target.checked)
-                                        }
-                                        className="form-checkbox"
+                                        onCheckedChange={setIsFree}
                                     />
                                     <Label htmlFor="is_free">
                                         This is a free event
