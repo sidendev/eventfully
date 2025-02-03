@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { notFound, redirect } from 'next/navigation';
-import { EventForm } from '@/app/events/create/event-form';
+import { EditEventForm } from './edit-event-form';
 
 export default async function EditEventPage({
     params,
@@ -56,11 +56,10 @@ export default async function EditEventPage({
         .select('id, name, city');
 
     return (
-        <EventForm
+        <EditEventForm
             eventTypes={eventTypes || []}
             locations={locations || []}
             event={event}
-            mode="edit"
         />
     );
 }

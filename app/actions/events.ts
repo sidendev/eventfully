@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { encodedRedirect } from '@/utils/utils';
+import { redirect } from 'next/navigation';
 
 export async function createEvent(formData: FormData) {
     try {
@@ -117,12 +118,8 @@ export async function createEvent(formData: FormData) {
             );
         }
 
-        revalidatePath('/events');
-        return encodedRedirect(
-            'success',
-            '/organiser',
-            'Event created successfully'
-        );
+        revalidatePath('/organiser');
+        redirect('/organiser');
     } catch (error) {
         console.error('Event creation error:', error);
         return encodedRedirect(

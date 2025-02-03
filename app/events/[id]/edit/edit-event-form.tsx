@@ -1,6 +1,6 @@
 'use client';
 
-import { createEvent, updateEvent } from '@/app/actions/events';
+import { updateEvent } from '@/app/actions/events';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -21,48 +21,40 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { UploadImage } from '@/components/upload-image';
 import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import Link from 'next/link'; // Changed from react-router-dom
+import { useState } from 'react';
 import { DateTimePicker } from '@/components/date-time-picker';
 import { SubmitButton } from '@/components/submit-button';
 import { EventTypeDialog } from '@/components/event-type-dialog';
 import { LocationDialog } from '@/components/location-dialog';
 import { Switch } from '@/components/ui/switch';
 
-interface EventFormProps {
+interface EditEventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
     locations: Array<{ id: string; name: string; city: string }>;
-    event?: any; // existing event data for edit mode
-    mode?: 'create' | 'edit';
+    event: any; // TODO: Add proper type
 }
 
-export function EventForm({
+export function EditEventForm({
     eventTypes,
     locations,
     event,
-    mode = 'create',
-}: EventFormProps) {
-    const [isFree, setIsFree] = useState(
-        event ? event.ticket_price === 0 : true
-    );
+}: EditEventFormProps) {
+    const [isFree, setIsFree] = useState(event.ticket_price === 0);
     const [startDate, setStartDate] = useState<Date | undefined>(
-        event ? new Date(event.starts_at) : undefined
+        event.starts_at ? new Date(event.starts_at) : undefined
     );
     const [endDate, setEndDate] = useState<Date | undefined>(
-        event ? new Date(event.ends_at) : undefined
+        event.ends_at ? new Date(event.ends_at) : undefined
     );
-
-    const action = mode === 'create' ? createEvent : updateEvent;
 
     // function to refresh locations
     const handleLocationCreated = () => {
-        // This should trigger a server refetch of the locations
         window.location.reload();
     };
 
     // Add this function to refresh event types
     const handleEventTypeCreated = () => {
-        // This will trigger a server refetch of the event types
         window.location.reload();
     };
 
@@ -77,75 +69,78 @@ export function EventForm({
             </Link>
 
             <div className="max-w-3xl mx-auto">
-                <form action={action} className="space-y-8">
-                    {mode === 'edit' && (
-                        <input type="hidden" name="id" value={event.id} />
-                    )}
-
+                <form action={updateEvent} className="space-y-8">
+                    <input type="hidden" name="id" value={event.id} />
                     <Card>
                         <CardHeader>
-                            <CardTitle>
-                                {mode === 'create'
-                                    ? 'Create New Event'
-                                    : 'Edit Event'}
-                            </CardTitle>
+                            <CardTitle>Edit Event</CardTitle>
                             <CardDescription>
-                                {mode === 'create'
-                                    ? 'Create a new event for your organisation'
-                                    : 'Update your event details'}
+                                Update your event details
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="title">Event Title</Label>
-                                <Input
-                                    id="title"
-                                    name="title"
-                                    required
-                                    defaultValue={event?.title}
-                                />
-                            </div>
+                        <CardContent className="space-y-8">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title">Event Title</Label>
+                                    <Input
+                                        id="title"
+                                        name="title"
+                                        required
+                                        defaultValue={event.title}
+                                        placeholder="Enter event title"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="short_description">
-                                    Short Description
-                                </Label>
-                                <Textarea
-                                    id="short_description"
-                                    name="short_description"
-                                    required
-                                    defaultValue={event?.short_description}
-                                />
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="short_description">
+                                        Short Description
+                                    </Label>
+                                    <Textarea
+                                        id="short_description"
+                                        name="short_description"
+                                        required
+                                        defaultValue={event.short_description}
+                                        placeholder="Brief description for event listings"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="full_description">
-                                    Full Description
-                                </Label>
-                                <Textarea
-                                    id="full_description"
-                                    name="full_description"
-                                    required
-                                    className="min-h-[200px]"
-                                    defaultValue={event?.full_description}
-                                />
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="full_description">
+                                        Full Description
+                                    </Label>
+                                    <Textarea
+                                        id="full_description"
+                                        name="full_description"
+                                        required
+                                        defaultValue={event.full_description}
+                                        placeholder="Detailed event description"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label>Event Image</Label>
-                                <UploadImage
-                                    endpoint="eventImage"
-                                    name="image_url"
-                                    defaultValue={event?.image_url}
-                                />
+                                <div className="space-y-2">
+                                    <Label>Event Image</Label>
+                                    <UploadImage
+                                        name="image_url"
+                                        defaultValue={event.image_url}
+                                        endpoint="eventImage"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="type">Event Type</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="type">Event Type</Label>
+                                        <EventTypeDialog
+                                            onEventTypeCreated={
+                                                handleEventTypeCreated
+                                            }
+                                        />
+                                    </div>
                                     <Select
                                         name="type_id"
-                                        defaultValue={event?.type_id}
+                                        defaultValue={event.type_id}
+                                        required
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select type" />
@@ -161,18 +156,23 @@ export function EventForm({
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <EventTypeDialog
-                                        onEventTypeCreated={
-                                            handleEventTypeCreated
-                                        }
-                                    />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="location">Location</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="location">
+                                            Location
+                                        </Label>
+                                        <LocationDialog
+                                            onLocationCreated={
+                                                handleLocationCreated
+                                            }
+                                        />
+                                    </div>
                                     <Select
                                         name="location_id"
-                                        defaultValue={event?.location_id}
+                                        defaultValue={event.location_id}
+                                        required
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select location" />
@@ -189,11 +189,6 @@ export function EventForm({
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <LocationDialog
-                                        onLocationCreated={
-                                            handleLocationCreated
-                                        }
-                                    />
                                 </div>
                             </div>
 
@@ -203,7 +198,9 @@ export function EventForm({
                                     <DateTimePicker
                                         name="starts_at"
                                         date={startDate}
-                                        setDate={setStartDate}
+                                        setDate={(date: Date | undefined) =>
+                                            setStartDate(date)
+                                        }
                                         label="Start Date & Time"
                                     />
                                 </div>
@@ -213,7 +210,9 @@ export function EventForm({
                                     <DateTimePicker
                                         name="ends_at"
                                         date={endDate}
-                                        setDate={setEndDate}
+                                        setDate={(date: Date | undefined) =>
+                                            setEndDate(date)
+                                        }
                                         label="End Date & Time"
                                     />
                                 </div>
@@ -243,9 +242,7 @@ export function EventForm({
                                             type="number"
                                             min="0"
                                             step="0.01"
-                                            defaultValue={
-                                                event?.ticket_price || ''
-                                            }
+                                            defaultValue={event.ticket_price}
                                             required
                                         />
                                     </div>
@@ -260,9 +257,7 @@ export function EventForm({
                                         name="max_attendees"
                                         type="number"
                                         min="1"
-                                        defaultValue={
-                                            event?.max_attendees || ''
-                                        }
+                                        defaultValue={event.max_attendees}
                                     />
                                 </div>
                             </div>
@@ -270,11 +265,7 @@ export function EventForm({
                     </Card>
 
                     <div className="flex justify-end">
-                        <SubmitButton>
-                            {mode === 'create'
-                                ? 'Create Event'
-                                : 'Save Changes'}
-                        </SubmitButton>
+                        <SubmitButton>Save Changes</SubmitButton>
                     </div>
                 </form>
             </div>

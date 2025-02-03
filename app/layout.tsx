@@ -9,6 +9,7 @@ import './globals.css';
 import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
 import { extractRouterConfig } from 'uploadthing/server';
 import { ourFileRouter } from '@/app/api/uploadthing/core';
+import { Toaster } from 'sonner';
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -123,6 +124,7 @@ export default async function RootLayout({
                         </footer>
                     </div>
                 </ThemeProvider>
+                <Toaster position="top-center" />
             </body>
         </html>
     );

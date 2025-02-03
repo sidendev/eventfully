@@ -1,0 +1,249 @@
+'use client';
+
+import { createEvent } from '@/app/actions/events';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { UploadImage } from '@/components/upload-image';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { DateTimePicker } from '@/components/date-time-picker';
+import { SubmitButton } from '@/components/submit-button';
+import { EventTypeDialog } from '@/components/event-type-dialog';
+import { LocationDialog } from '@/components/location-dialog';
+import { Switch } from '@/components/ui/switch';
+
+interface CreateEventFormProps {
+    eventTypes: Array<{ id: string; name: string }>;
+    locations: Array<{ id: string; name: string; city: string }>;
+}
+
+export function CreateEventForm({
+    eventTypes,
+    locations,
+}: CreateEventFormProps) {
+    const [isFree, setIsFree] = useState(true);
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+
+    // function to refresh locations to be fixed
+    const handleLocationCreated = () => {
+        window.location.reload();
+    };
+
+    // Add this function to refresh event types to be fixed
+    const handleEventTypeCreated = () => {
+        window.location.reload();
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <Link
+                href="/organiser"
+                className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+            >
+                <ArrowLeft size={16} className="mr-2" />
+                Back to dashboard
+            </Link>
+
+            <div className="max-w-3xl mx-auto">
+                <form action={createEvent} className="space-y-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Create New Event</CardTitle>
+                            <CardDescription>
+                                Create a new event for your organisation
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-8">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title">Event Title</Label>
+                                    <Input
+                                        id="title"
+                                        name="title"
+                                        required
+                                        placeholder="Enter event title"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="short_description">
+                                        Short Description
+                                    </Label>
+                                    <Textarea
+                                        id="short_description"
+                                        name="short_description"
+                                        required
+                                        placeholder="Brief description for event listings"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="full_description">
+                                        Full Description
+                                    </Label>
+                                    <Textarea
+                                        id="full_description"
+                                        name="full_description"
+                                        required
+                                        placeholder="Detailed event description"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Event Image</Label>
+                                    <UploadImage
+                                        name="image_url"
+                                        endpoint="eventImage"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="type">Event Type</Label>
+                                        <EventTypeDialog
+                                            onEventTypeCreated={
+                                                handleEventTypeCreated
+                                            }
+                                        />
+                                    </div>
+                                    <Select name="type_id" required>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {eventTypes.map((type) => (
+                                                <SelectItem
+                                                    key={type.id}
+                                                    value={type.id}
+                                                >
+                                                    {type.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="location">
+                                            Location
+                                        </Label>
+                                        <LocationDialog
+                                            onLocationCreated={
+                                                handleLocationCreated
+                                            }
+                                        />
+                                    </div>
+                                    <Select name="location_id" required>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select location" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {locations.map((location) => (
+                                                <SelectItem
+                                                    key={location.id}
+                                                    value={location.id}
+                                                >
+                                                    {location.name},{' '}
+                                                    {location.city}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Start Date & Time</Label>
+                                    <DateTimePicker
+                                        name="starts_at"
+                                        date={startDate}
+                                        setDate={setStartDate}
+                                        label="Start Date & Time"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>End Date & Time</Label>
+                                    <DateTimePicker
+                                        name="ends_at"
+                                        date={endDate}
+                                        setDate={setEndDate}
+                                        label="End Date & Time"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="is_free"
+                                        name="is_free"
+                                        checked={isFree}
+                                        onCheckedChange={setIsFree}
+                                    />
+                                    <Label htmlFor="is_free">
+                                        This is a free event
+                                    </Label>
+                                </div>
+
+                                {!isFree && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="ticket_price">
+                                            Ticket Price (£)
+                                        </Label>
+                                        <Input
+                                            id="ticket_price"
+                                            name="ticket_price"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="max_attendees">
+                                        Maximum Attendees (Optional)
+                                    </Label>
+                                    <Input
+                                        id="max_attendees"
+                                        name="max_attendees"
+                                        type="number"
+                                        min="1"
+                                    />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div className="flex justify-end">
+                        <SubmitButton>Create Event</SubmitButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}

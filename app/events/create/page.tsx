@@ -1,9 +1,8 @@
 import { checkOrganiserProfile } from '@/utils/check-organiser-profile';
 import { createClient } from '@/utils/supabase/server';
-import { EventForm } from './event-form';
+import { CreateEventForm } from './create-event-form';
 
 export default async function CreateEventPage() {
-    // This will redirect if organiser profile is incomplete
     const organiserProfile = await checkOrganiserProfile();
 
     const supabase = await createClient();
@@ -17,6 +16,9 @@ export default async function CreateEventPage() {
         .select('id, name, city');
 
     return (
-        <EventForm eventTypes={eventTypes || []} locations={locations || []} />
+        <CreateEventForm
+            eventTypes={eventTypes || []}
+            locations={locations || []}
+        />
     );
 }
