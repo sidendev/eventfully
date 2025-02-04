@@ -12,13 +12,13 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-interface EventPageProps {
-    params: {
-        id: string;
-    };
-}
-
-export default async function EventPage({ params }: EventPageProps) {
+export default async function EventPage({
+    params,
+}: {
+    params: { id: string };
+}) {
+    // Convert params to a Promise and await it
+    const resolvedParams = await Promise.resolve(params);
     const supabase = await createClient();
 
     const { data: event, error } = await supabase
@@ -31,7 +31,7 @@ export default async function EventPage({ params }: EventPageProps) {
             organiser_profiles (*)
         `
         )
-        .eq('id', params.id)
+        .eq('id', resolvedParams.id)
         .single();
 
     if (error || !event) {
