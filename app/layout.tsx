@@ -9,6 +9,18 @@ import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
 import { extractRouterConfig } from 'uploadthing/server';
 import { ourFileRouter } from '@/app/api/uploadthing/core';
 import { Toaster } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserCircle2 } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
+import { signOutAction } from '@/app/actions';
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -44,6 +56,14 @@ export default async function RootLayout({
         data: { user },
     } = await supabase.auth.getUser();
 
+    const { data: profile } = user
+        ? await supabase
+              .from('profiles')
+              .select('avatar_url')
+              .eq('user_id', user.id)
+              .single()
+        : { data: null };
+
     return (
         <html
             lang="en"
@@ -77,32 +97,100 @@ export default async function RootLayout({
                                             </Link>
                                             <nav className="hidden md:flex items-center gap-6">
                                                 <Link
-                                                    href="/events"
+                                                    href="/"
                                                     className="hover:text-primary transition-colors"
                                                 >
                                                     Browse Events
                                                 </Link>
                                                 {user && (
-                                                    <>
-                                                        <Link
-                                                            href="/profile"
-                                                            className="hover:text-primary transition-colors"
-                                                        >
-                                                            Profile
-                                                        </Link>
-                                                        <Link
-                                                            href="/events/create"
-                                                            className="hover:text-primary transition-colors"
-                                                        >
-                                                            Create Event
-                                                        </Link>
-                                                    </>
+                                                    <Link
+                                                        href="/events/create"
+                                                        className="hover:text-primary transition-colors"
+                                                    >
+                                                        Create Event
+                                                    </Link>
                                                 )}
                                             </nav>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <ThemeSwitcher />
-                                            <HeaderAuth />
+                                            {user ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Link
+                                                        href="/profile"
+                                                        className="hover:opacity-80 transition-opacity"
+                                                    >
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage
+                                                                src={
+                                                                    profile?.avatar_url ||
+                                                                    ''
+                                                                }
+                                                                alt="Profile"
+                                                            />
+                                                            <AvatarFallback>
+                                                                <UserCircle2 className="h-5 w-5" />
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                    </Link>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger
+                                                            asChild
+                                                        >
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="h-8 w-8 p-0"
+                                                            >
+                                                                <span className="sr-only">
+                                                                    Open menu
+                                                                </span>
+                                                                <ChevronDown className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href="/profile"
+                                                                    className="w-full"
+                                                                >
+                                                                    Profile
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href="/organiser"
+                                                                    className="w-full"
+                                                                >
+                                                                    Organiser
+                                                                    Settings
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem>
+                                                                <form
+                                                                    action={
+                                                                        signOutAction
+                                                                    }
+                                                                    className="w-full"
+                                                                >
+                                                                    <button
+                                                                        type="submit"
+                                                                        className="w-full text-left"
+                                                                    >
+                                                                        Sign out
+                                                                    </button>
+                                                                </form>
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            ) : (
+                                                <HeaderAuth />
+                                            )}
                                         </div>
                                     </div>
                                 </div>

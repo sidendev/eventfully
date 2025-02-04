@@ -21,7 +21,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { UploadImage } from '@/components/upload-image';
 import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link'; // Changed from react-router-dom
+import Link from 'next/link';
 import { useState } from 'react';
 import { DateTimePicker } from '@/components/date-time-picker';
 import { SubmitButton } from '@/components/submit-button';
@@ -33,7 +33,7 @@ import { Badge } from '@/components/ui/badge';
 interface EditEventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
     locations: Array<{ id: string; name: string; city: string }>;
-    event: any; // TODO: Add proper type
+    event: any;
 }
 
 export function EditEventForm({
