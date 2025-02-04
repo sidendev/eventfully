@@ -203,10 +203,7 @@ export default async function RootLayout({
 
                         <footer className="border-t border-t-foreground/10 py-6 mt-8">
                             <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-                                <p>
-                                    © {new Date().getFullYear()} Eventfully.
-                                    All rights reserved.
-                                </p>
+                                <p>© {new Date().getFullYear()} Eventfully</p>
                             </div>
                         </footer>
                     </div>
