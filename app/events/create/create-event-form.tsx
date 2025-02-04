@@ -28,6 +28,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { EventTypeDialog } from '@/components/event-type-dialog';
 import { LocationDialog } from '@/components/location-dialog';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 
 interface CreateEventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
@@ -38,7 +39,7 @@ export function CreateEventForm({
     eventTypes,
     locations,
 }: CreateEventFormProps) {
-    const [isFree, setIsFree] = useState(true);
+    const [isFree] = useState(true);
     const [startDate, setStartDate] = useState<Date | undefined>(undefined);
     const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
@@ -200,29 +201,23 @@ export function CreateEventForm({
                                     <Switch
                                         id="is_free"
                                         name="is_free"
-                                        checked={isFree}
-                                        onCheckedChange={setIsFree}
+                                        checked={true}
+                                        disabled
+                                        className="cursor-not-allowed"
                                     />
                                     <Label htmlFor="is_free">
                                         This is a free event
                                     </Label>
+                                    <Badge variant="secondary" className="ml-2">
+                                        All events are free during beta
+                                    </Badge>
                                 </div>
 
-                                {!isFree && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="ticket_price">
-                                            Ticket Price (£)
-                                        </Label>
-                                        <Input
-                                            id="ticket_price"
-                                            name="ticket_price"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            required
-                                        />
-                                    </div>
-                                )}
+                                <input
+                                    type="hidden"
+                                    name="ticket_price"
+                                    value="0"
+                                />
 
                                 <div className="space-y-2">
                                     <Label htmlFor="max_attendees">

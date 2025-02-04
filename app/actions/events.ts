@@ -40,8 +40,11 @@ export async function createEvent(formData: FormData) {
         const type_id = formData.get('type_id') as string;
         const location_id = formData.get('location_id') as string;
         const max_attendees = formData.get('max_attendees') as string;
-        const is_free = formData.get('is_free') === 'true';
-        const ticket_price = formData.get('ticket_price') as string;
+
+        // TODO: Temporarily force all events to be free during beta
+        // This will be updated when Stripe integration is implemented
+        const is_free = true;
+        const ticket_price = 0;
         const starts_at = formData.get('starts_at') as string;
         const ends_at = formData.get('ends_at') as string;
 
@@ -103,7 +106,7 @@ export async function createEvent(formData: FormData) {
             location_id,
             max_attendees: max_attendees ? parseInt(max_attendees) : null,
             organiser_profile_id: organiserProfile.id,
-            ticket_price: is_free ? 0 : parseFloat(ticket_price),
+            ticket_price: 0, // Force free during beta
             is_published: true,
             starts_at: startDate.toISOString(),
             ends_at: endDate.toISOString(),
@@ -242,8 +245,8 @@ export async function updateEvent(formData: FormData) {
         const type_id = formData.get('type_id') as string;
         const location_id = formData.get('location_id') as string;
         const max_attendees = formData.get('max_attendees') as string;
-        const is_free = formData.get('is_free') === 'true';
-        const ticket_price = formData.get('ticket_price') as string;
+        const is_free = true;
+        const ticket_price = 0;
         const starts_at = formData.get('starts_at') as string;
         const ends_at = formData.get('ends_at') as string;
 
@@ -284,7 +287,7 @@ export async function updateEvent(formData: FormData) {
             type_id,
             location_id,
             max_attendees: max_attendees ? parseInt(max_attendees) : null,
-            ticket_price: is_free ? 0 : parseFloat(ticket_price),
+            ticket_price: 0, // Force free during beta
             starts_at: startDate.toISOString(),
             ends_at: endDate.toISOString(),
         });

@@ -28,6 +28,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { EventTypeDialog } from '@/components/event-type-dialog';
 import { LocationDialog } from '@/components/location-dialog';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 
 interface EditEventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
@@ -40,7 +41,8 @@ export function EditEventForm({
     locations,
     event,
 }: EditEventFormProps) {
-    const [isFree, setIsFree] = useState(event.ticket_price === 0);
+    // TODO: Re-enable price settings when Stripe integration is complete
+    // const [isFree, setIsFree] = useState(event.ticket_price === 0);
     const [startDate, setStartDate] = useState<Date | undefined>(
         event.starts_at ? new Date(event.starts_at) : undefined
     );
@@ -223,14 +225,25 @@ export function EditEventForm({
                                     <Switch
                                         id="is_free"
                                         name="is_free"
-                                        checked={isFree}
-                                        onCheckedChange={setIsFree}
+                                        checked={true}
+                                        disabled
+                                        className="cursor-not-allowed"
                                     />
                                     <Label htmlFor="is_free">
                                         This is a free event
                                     </Label>
+                                    <Badge variant="secondary" className="ml-2">
+                                        All events are free during beta
+                                    </Badge>
                                 </div>
 
+                                <input
+                                    type="hidden"
+                                    name="ticket_price"
+                                    value="0"
+                                />
+
+                                {/* TODO: Re-enable when Stripe integration is complete
                                 {!isFree && (
                                     <div className="space-y-2">
                                         <Label htmlFor="ticket_price">
@@ -247,6 +260,7 @@ export function EditEventForm({
                                         />
                                     </div>
                                 )}
+                                */}
 
                                 <div className="space-y-2">
                                     <Label htmlFor="max_attendees">
@@ -257,7 +271,7 @@ export function EditEventForm({
                                         name="max_attendees"
                                         type="number"
                                         min="1"
-                                        defaultValue={event.max_attendees}
+                                        defaultValue={event.max_attendees || ''}
                                     />
                                 </div>
                             </div>
