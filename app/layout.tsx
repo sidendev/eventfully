@@ -91,7 +91,7 @@ export default async function RootLayout({
                                         <div className="flex items-center gap-8">
                                             <Link
                                                 href="/"
-                                                className="text-xl font-semibold hover:text-primary transition-colors"
+                                                className="text-2xl font-extrabold hover:text-primary transition-colors"
                                             >
                                                 Eventfully
                                             </Link>
