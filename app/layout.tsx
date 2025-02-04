@@ -88,30 +88,32 @@ export default async function RootLayout({
                             <nav className="border-b border-b-foreground/10">
                                 <div className="container mx-auto px-4">
                                     <div className="h-16 flex items-center justify-between">
-                                        <div className="flex items-center gap-8">
+                                        <div className="flex-shrink-0">
                                             <Link
                                                 href="/"
                                                 className="text-2xl font-extrabold hover:text-primary transition-colors"
                                             >
                                                 Eventfully
                                             </Link>
-                                            <nav className="hidden md:flex items-center gap-6">
+                                        </div>
+
+                                        <nav className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+                                            <Link
+                                                href="/"
+                                                className="hover:text-primary transition-colors"
+                                            >
+                                                Browse Events
+                                            </Link>
+                                            {user && (
                                                 <Link
-                                                    href="/"
+                                                    href="/events/create"
                                                     className="hover:text-primary transition-colors"
                                                 >
-                                                    Browse Events
+                                                    Create Event
                                                 </Link>
-                                                {user && (
-                                                    <Link
-                                                        href="/events/create"
-                                                        className="hover:text-primary transition-colors"
-                                                    >
-                                                        Create Event
-                                                    </Link>
-                                                )}
-                                            </nav>
-                                        </div>
+                                            )}
+                                        </nav>
+
                                         <div className="flex items-center gap-4">
                                             <ThemeSwitcher />
                                             {user ? (
