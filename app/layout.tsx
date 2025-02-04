@@ -32,6 +32,14 @@ export const metadata = {
     description:
         'Discover and join events in your community, or create your own with Eventfully - the easiest way to find and create local events.',
     keywords: ['events', 'local events', 'community events', 'event planning'],
+    icons: {
+        icon: [
+            { url: '/favicon.ico' },
+            { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
+        ],
+        shortcut: '/favicon.ico',
+        apple: '/favicon.ico',
+    },
     openGraph: {
         title: 'Eventfully | Find Local Events',
         description:
