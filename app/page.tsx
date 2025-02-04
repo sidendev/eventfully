@@ -12,6 +12,14 @@ export default async function Home({
 }: {
     searchParams: { [key: string]: string | undefined };
 }) {
+    // Converts searchParams to a Promise and await it
+    const params = await Promise.resolve(searchParams);
+
+    const sort = params.sort || 'starts_at';
+    const search = params.search || '';
+    const type = params.type || '';
+    const page = Number(params.page) || 1;
+
     const supabase = await createClient();
 
     let query = supabase
@@ -25,16 +33,15 @@ export default async function Home({
         `
         )
         .eq('is_published', true)
-        .order('starts_at', { ascending: searchParams.sort !== 'latest' });
+        .order('starts_at', { ascending: sort !== 'latest' });
 
-    if (searchParams.search) {
-        query = query.ilike('title', `%${searchParams.search}%`);
+    if (search) {
+        query = query.ilike('title', `%${search}%`);
     }
-    if (searchParams.type) {
-        query = query.eq('type_id', searchParams.type);
+    if (type) {
+        query = query.eq('type_id', type);
     }
 
-    const page = Number(searchParams.page) || 1;
     query = query.range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE - 1);
 
     const { data: events, error, count } = await query;
