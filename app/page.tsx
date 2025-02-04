@@ -25,16 +25,13 @@ export default async function Home({
         `
         )
         .eq('is_published', true)
-        .order('starts_at', { ascending: true });
+        .order('starts_at', { ascending: searchParams.sort !== 'latest' });
 
     if (searchParams.search) {
         query = query.ilike('title', `%${searchParams.search}%`);
     }
     if (searchParams.type) {
         query = query.eq('type_id', searchParams.type);
-    }
-    if (searchParams.location) {
-        query = query.eq('location_id', searchParams.location);
     }
 
     const page = Number(searchParams.page) || 1;

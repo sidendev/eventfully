@@ -80,17 +80,15 @@ export function EventsFilter() {
                     </SelectContent>
                 </Select>
                 <Select
-                    defaultValue={searchParams.get('location') ?? 'all'}
-                    onValueChange={(value) => handleFilter('location', value)}
+                    defaultValue={searchParams.get('sort') ?? 'soonest'}
+                    onValueChange={(value) => handleFilter('sort', value)}
                 >
                     <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Location" />
+                        <SelectValue placeholder="Sort By" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                        <SelectItem value="london">London</SelectItem>
-                        <SelectItem value="manchester">Manchester</SelectItem>
-                        <SelectItem value="birmingham">Birmingham</SelectItem>
+                        <SelectItem value="soonest">Soonest</SelectItem>
+                        <SelectItem value="latest">Latest</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
