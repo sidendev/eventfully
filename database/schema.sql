@@ -496,4 +496,9 @@ begin
 end;
 $$;
 
+-- policy for organiser_profiles
+CREATE POLICY "Organiser profiles are viewable by everyone"
+    ON public.organiser_profiles FOR SELECT
+    USING (true);
+
 
