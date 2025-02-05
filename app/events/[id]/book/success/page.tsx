@@ -13,15 +13,21 @@ import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import { AddToCalendar } from '@/components/ui/add-to-calendar-wrapper';
 
+interface Props {
+    params: {
+        id: string;
+    };
+    searchParams: {
+        booking: string;
+    };
+}
+
 export default async function BookingSuccessPage({
     params,
     searchParams,
-}: {
-    params: { id: string };
-    searchParams: { booking: string };
-}) {
-    console.log('Success page params:', params);
-    console.log('Success page searchParams:', searchParams);
+}: Props) {
+    // We only need to resolve searchParams
+    const resolvedSearchParams = await Promise.resolve(searchParams);
 
     const supabase = await createClient();
 
@@ -40,7 +46,7 @@ export default async function BookingSuccessPage({
             tickets (*)
         `
         )
-        .eq('id', searchParams.booking)
+        .eq('id', resolvedSearchParams.booking)
         .single();
 
     if (bookingError) {

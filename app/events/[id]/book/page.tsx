@@ -10,6 +10,7 @@ interface Props {
 }
 
 export default async function BookEventPage({ params, searchParams }: Props) {
+    const resolvedParams = await Promise.resolve(params);
     const supabase = await createClient();
 
     const { data: event, error } = await supabase
@@ -22,7 +23,7 @@ export default async function BookEventPage({ params, searchParams }: Props) {
             organiser_profiles (*)
         `
         )
-        .eq('id', params.id)
+        .eq('id', resolvedParams.id)
         .single();
 
     if (error || !event) {
