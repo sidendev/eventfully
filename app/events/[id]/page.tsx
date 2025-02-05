@@ -1,5 +1,13 @@
 import { createClient } from '@/utils/supabase/server';
-import { Calendar, MapPin, Share2, ArrowLeft, Clock } from 'lucide-react';
+import {
+    Calendar,
+    MapPin,
+    Share2,
+    ArrowLeft,
+    Clock,
+    Building2,
+    Ticket,
+} from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -11,13 +19,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 export default async function EventPage({
     params,
 }: {
     params: { id: string };
 }) {
-    // Convert params to a Promise and await it
+    // Converts params to a Promise and await it
     const resolvedParams = await Promise.resolve(params);
     const supabase = await createClient();
 
@@ -76,7 +85,7 @@ export default async function EventPage({
 
                         <div className="prose prose-gray dark:prose-invert max-w-none">
                             <h2 className="text-2xl font-semibold mb-4">
-                                About this event
+                                About this event:
                             </h2>
                             <p className="whitespace-pre-wrap">
                                 {event.full_description}
@@ -92,42 +101,65 @@ export default async function EventPage({
                             <CardContent className="space-y-6">
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3">
-                                        <Calendar className="w-5 h-5 mt-0.5" />
+                                        <Calendar className="w-5 h-5 mt-0.5 text-muted-foreground" />
                                         <div>
                                             <div className="font-medium">
                                                 Date and time
                                             </div>
-                                            <div className="text-muted-foreground">
-                                                {formatDate(event.starts_at)}
+                                            <div className="text-muted-foreground space-y-1">
+                                                <div>
+                                                    <span className="text-foreground/70">
+                                                        Starts:
+                                                    </span>{' '}
+                                                    {formatDate(
+                                                        event.starts_at
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <span className="text-foreground/70">
+                                                        Ends:
+                                                    </span>{' '}
+                                                    {formatDate(event.ends_at)}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-3">
-                                        <MapPin className="w-5 h-5 mt-0.5" />
+                                        <MapPin className="w-5 h-5 mt-0.5 text-muted-foreground" />
                                         <div>
                                             <div className="font-medium">
                                                 Location
                                             </div>
                                             <div className="text-muted-foreground">
                                                 {event.locations.name}
+                                                {event.locations.address && (
+                                                    <>
+                                                        <br />
+                                                        {
+                                                            event.locations
+                                                                .address
+                                                        }
+                                                    </>
+                                                )}
                                                 <br />
-                                                {event.locations.address}
-                                                <br />
-                                                {event.locations.city},{' '}
-                                                {event.locations.country}
+                                                {event.locations.city}
+                                                {event.locations.country &&
+                                                    `, ${event.locations.country}`}
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-3">
-                                        <Clock className="w-5 h-5 mt-0.5" />
+                                        <Ticket className="w-5 h-5 mt-0.5 text-muted-foreground" />
                                         <div>
                                             <div className="font-medium">
-                                                Duration
+                                                Tickets Available
                                             </div>
                                             <div className="text-muted-foreground">
-                                                {formatDate(event.ends_at)}
+                                                {event.max_attendees > 0
+                                                    ? `${event.max_attendees} tickets remaining`
+                                                    : 'Sold out'}
                                             </div>
                                         </div>
                                     </div>
@@ -154,15 +186,37 @@ export default async function EventPage({
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Organiser</CardTitle>
+                                <CardTitle>Organiser:</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="font-medium">
-                                    {event.organiser_profiles.name}
+                                <div className="flex items-start space-x-4">
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarImage
+                                            src={
+                                                event.organiser_profiles
+                                                    .profile_image_url
+                                            }
+                                            alt={event.organiser_profiles.name}
+                                        />
+                                        <AvatarFallback>
+                                            <Building2 className="h-6 w-6" />
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 space-y-1">
+                                        <h3 className="font-medium leading-none">
+                                            {event.organiser_profiles.name}
+                                        </h3>
+                                        {event.organiser_profiles
+                                            .description && (
+                                            <p className="text-sm text-muted-foreground">
+                                                {
+                                                    event.organiser_profiles
+                                                        .description
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="text-muted-foreground mt-1">
-                                    {event.organiser_profiles.description}
-                                </p>
                             </CardContent>
                         </Card>
                     </div>

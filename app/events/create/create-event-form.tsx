@@ -19,7 +19,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { UploadImage } from '@/components/upload-image';
+import { EventImageUpload } from '@/components/event-image-upload';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -69,7 +69,8 @@ export function CreateEventForm({
                         <CardHeader>
                             <CardTitle>Create New Event</CardTitle>
                             <CardDescription>
-                                Create a new event for your organisation
+                                Organiser Profile is required to be set up
+                                before you can create an event.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-8">
@@ -92,7 +93,7 @@ export function CreateEventForm({
                                         id="short_description"
                                         name="short_description"
                                         required
-                                        placeholder="Brief description for event listings"
+                                        placeholder="Brief description for event listings page"
                                     />
                                 </div>
 
@@ -104,16 +105,13 @@ export function CreateEventForm({
                                         id="full_description"
                                         name="full_description"
                                         required
-                                        placeholder="Detailed event description"
+                                        placeholder="Detailed event description for your event page"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label>Event Image</Label>
-                                    <UploadImage
-                                        name="image_url"
-                                        endpoint="eventImage"
-                                    />
+                                    <EventImageUpload name="image_url" />
                                 </div>
                             </div>
 
@@ -176,22 +174,22 @@ export function CreateEventForm({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Start Date & Time</Label>
                                     <DateTimePicker
                                         name="starts_at"
                                         date={startDate}
                                         setDate={setStartDate}
                                         label="Start Date & Time"
+                                        required
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>End Date & Time</Label>
                                     <DateTimePicker
                                         name="ends_at"
                                         date={endDate}
                                         setDate={setEndDate}
                                         label="End Date & Time"
+                                        required
                                     />
                                 </div>
                             </div>
@@ -221,13 +219,15 @@ export function CreateEventForm({
 
                                 <div className="space-y-2">
                                     <Label htmlFor="max_attendees">
-                                        Maximum Attendees (Optional)
+                                        Number of tickets available
                                     </Label>
                                     <Input
                                         id="max_attendees"
                                         name="max_attendees"
                                         type="number"
                                         min="1"
+                                        required
+                                        placeholder="Enter number of available tickets"
                                     />
                                 </div>
                             </div>

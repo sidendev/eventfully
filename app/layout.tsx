@@ -162,6 +162,28 @@ export default async function RootLayout({
                                                                 asChild
                                                             >
                                                                 <Link
+                                                                    href="/"
+                                                                    className="w-full"
+                                                                >
+                                                                    Browse
+                                                                    Events
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href="/events/create"
+                                                                    className="w-full"
+                                                                >
+                                                                    Create Event
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                            >
+                                                                <Link
                                                                     href="/profile"
                                                                     className="w-full"
                                                                 >

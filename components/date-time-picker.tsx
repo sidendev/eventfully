@@ -19,6 +19,7 @@ interface DateTimePickerProps {
     setDate: (date: Date | undefined) => void;
     label: string;
     name: string;
+    required?: boolean;
 }
 
 export function DateTimePicker({
@@ -26,6 +27,7 @@ export function DateTimePicker({
     setDate,
     label,
     name,
+    required = false,
 }: DateTimePickerProps) {
     const [selectedTime, setSelectedTime] = React.useState(
         date ? format(date, 'HH:mm') : ''
@@ -48,7 +50,7 @@ export function DateTimePicker({
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
-                            variant={'outline'}
+                            variant="outline"
                             className={cn(
                                 'w-[240px] justify-start text-left font-normal',
                                 !date && 'text-muted-foreground'
@@ -68,6 +70,7 @@ export function DateTimePicker({
                             selected={date}
                             onSelect={setDate}
                             initialFocus
+                            required={required}
                         />
                     </PopoverContent>
                 </Popover>
@@ -76,11 +79,13 @@ export function DateTimePicker({
                     value={selectedTime}
                     onChange={(e) => handleTimeChange(e.target.value)}
                     className="w-[140px]"
+                    required={required}
                 />
                 <input
                     type="hidden"
                     name={name}
                     value={date?.toISOString() || ''}
+                    required={required}
                 />
             </div>
         </div>
