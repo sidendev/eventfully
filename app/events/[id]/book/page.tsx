@@ -3,14 +3,14 @@ import { notFound } from 'next/navigation';
 import { BookingForm } from './booking-form';
 
 interface Props {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
     searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default async function BookEventPage({ params, searchParams }: Props) {
-    const resolvedParams = await Promise.resolve(params);
+    const resolvedParams = await params;
     const supabase = await createClient();
 
     const { data: event, error } = await supabase
