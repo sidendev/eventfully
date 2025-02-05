@@ -179,6 +179,16 @@ export default async function RootLayout({
                                                                     Create Event
                                                                 </Link>
                                                             </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href="/my-events"
+                                                                    className="w-full"
+                                                                >
+                                                                    My Events
+                                                                </Link>
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem
                                                                 asChild
