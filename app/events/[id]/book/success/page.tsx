@@ -12,22 +12,19 @@ import {
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import { AddToCalendar } from '@/components/ui/add-to-calendar-wrapper';
+import type { Metadata } from 'next';
 
-interface Props {
-    params: {
-        id: string;
-    };
-    searchParams: {
-        booking: string;
-    };
-}
+type Props = {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export default async function BookingSuccessPage({
-    params,
-    searchParams,
-}: Props) {
-    // We only need to resolve searchParams
-    const resolvedSearchParams = await Promise.resolve(searchParams);
+export default async function BookingSuccessPage(props: Props) {
+    // Destructure after awaiting to ensure type safety
+    const [{ id }, searchParams] = await Promise.all([
+        props.params,
+        props.searchParams,
+    ]);
 
     const supabase = await createClient();
 
@@ -46,7 +43,7 @@ export default async function BookingSuccessPage({
             tickets (*)
         `
         )
-        .eq('id', resolvedSearchParams.booking)
+        .eq('id', (searchParams as any).booking)
         .single();
 
     if (bookingError) {

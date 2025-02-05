@@ -7,18 +7,17 @@ import { InfiniteScroll } from '@/components/infinite-scroll';
 
 const ITEMS_PER_PAGE = 12;
 
-export default async function Home({
-    searchParams,
-}: {
-    searchParams: { [key: string]: string | undefined };
-}) {
-    // Converts searchParams to a Promise and await it
-    const params = await Promise.resolve(searchParams);
+type Props = {
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-    const sort = params.sort || 'starts_at';
-    const search = params.search || '';
-    const type = params.type || '';
-    const page = Number(params.page) || 1;
+export default async function Home(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const sort = searchParams.sort?.toString() || 'starts_at';
+    const search = searchParams.search?.toString() || '';
+    const type = searchParams.type?.toString() || '';
+    const page = Number(searchParams.page) || 1;
 
     const supabase = await createClient();
 

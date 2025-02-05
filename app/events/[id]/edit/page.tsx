@@ -2,11 +2,17 @@ import { createClient } from '@/utils/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import { EditEventForm } from './edit-event-form';
 
-export default async function EditEventPage({
-    params,
-}: {
-    params: { id: string };
-}) {
+type Props = {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function EditEventPage(props: Props) {
+    const [{ id }, searchParams] = await Promise.all([
+        props.params,
+        props.searchParams,
+    ]);
+
     const supabase = await createClient();
 
     // Checking if user is authenticated
@@ -33,7 +39,7 @@ export default async function EditEventPage({
     const { data: event, error: eventError } = await supabase
         .from('events')
         .select('*, locations (*), event_types (*)')
-        .eq('id', params.id)
+        .eq('id', id)
         .eq('organiser_profile_id', organiserProfile.id)
         .single();
 

@@ -21,13 +21,17 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-export default async function EventPage({
-    params,
-}: {
-    params: { id: string };
-}) {
-    // Converts params to a Promise and await it
-    const resolvedParams = await Promise.resolve(params);
+type Props = {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function EventPage(props: Props) {
+    const [{ id }, searchParams] = await Promise.all([
+        props.params,
+        props.searchParams,
+    ]);
+
     const supabase = await createClient();
 
     const { data: event, error } = await supabase
@@ -40,7 +44,7 @@ export default async function EventPage({
             organiser_profiles (*)
         `
         )
-        .eq('id', resolvedParams.id)
+        .eq('id', id)
         .single();
 
     if (error || !event) {
