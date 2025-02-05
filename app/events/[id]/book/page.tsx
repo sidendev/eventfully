@@ -2,11 +2,13 @@ import { createClient } from '@/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import { BookingForm } from './booking-form';
 
-export default async function BookingPage({
-    params,
-}: {
-    params: { id: string };
-}) {
+interface PageProps {
+    params: {
+        id: string;
+    };
+}
+
+export default async function BookEventPage({ params }: PageProps) {
     const supabase = await createClient();
 
     const { data: event, error } = await supabase
