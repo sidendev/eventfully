@@ -12,6 +12,10 @@
   <a href="#testing">Testing</a>
 </div>
 
+## Live Demo
+
+- Visit the live demo site: [Eventfully](https://eventfully-demo.vercel.app/)
+
 ## Features
 
 🎫 **Event Management**
@@ -202,7 +206,7 @@ export default function RootLayout({
 3. **Social Features**
    - Event sharing on social media
    - Organiser networking, allowing other users to organise same events
-   - Event comments and ratings
+   - Event ratings
    - Social media account login (Google, Twitter, Facebook, etc.)
 
 4. **Advanced Organiser Analytics**
