@@ -33,18 +33,20 @@
 
 🎨 **Modern UI/UX**
 - Responsive design for all devices
-- Dark mode support
+- Light and Dark mode support
 - Accessible components with ARIA labels
 - Loading states and error handling
 
 ## Tech Stack
 
 ### Core
-- [Next.js 15](https://nextjs.org/) - React framework with App Router
+- [Next.js 15](https://nextjs.org/) - React framework with App Router and Server Actions
 - [TypeScript](https://www.typescriptlang.org/) - Type safety
 - [Supabase](https://supabase.com/) - Backend and Authentication
 - [TailwindCSS](https://tailwindcss.com/) - Styling
 - [shadcn/ui](https://ui.shadcn.com/) - UI Components
+- [Vercel](https://vercel.com/) - Deployment
+- [UploadThing](https://uploadthing.com/) - Media File Uploads adn Storage
 
 ### Key Packages
 
@@ -65,7 +67,7 @@
 
 ## Getting Started
 
-### Test Account Credentials
+### Test Account Credentials:
 
 **Regular User:**
 Email: test@example.com
@@ -89,10 +91,132 @@ Password: test123456
   ```
 
 3. Set up your environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+  ```bash
+  cp .env.example .env
+  ```
 
-4. Run the development server:
-   ```bash
-   npm run dev
+4. Update `.env.local` with your credentials:  
+  ```bash
+  NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+  UPLOADTHING_SECRET=your_uploadthing_secret
+  UPLOADTHING_APP_ID=your_uploadthing_app_id
+  ```
+
+### Database Setup
+
+1. Create a new Supabase project at [supabase.com](https://supabase.com)
+
+2. Open the SQL editor panel on your Supabase project.
+
+3. Copy the contents of database/schema.sql into your Supabase SQL editor.
+
+4. Enable Row Level Security (RLS) policies as defined in the schema if they have not already been enabled.
+
+## Customization
+
+### Styling with shadcn/ui
+
+#### Theme Customization
+You can modify the theme in `app/globals.css`:
+```css
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    /* ... other variables ... */
+  }
+}
+```
+
+#### Changing Fonts
+1. Import your preferred font from `next/font/google` in `app/layout.tsx`:
+```typescript
+import { Inter, Roboto, Open_Sans } from 'next/font/google';
+
+// Example with Inter font
+const inter = Inter({ subsets: ['latin'] });
+
+// Or use a different font
+const roboto = Roboto({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+});
+```
+
+2. Apply the font to your application:
+```typescript
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
+    </html>
+  );
+}
+```
+
+3. For local fonts, place them in the `public/fonts` directory and use `next/font/local`.
+
+## Testing
+
+🔍 **Accessibility Testing**
+
+
+📱 **Device Testing**
+
+
+🚦 **Performance Testing**
+
+## Deployment with Vercel
+
+1. Push your code to GitHub on the main branch.
+2. Set up a new project on Vercel.
+3. Connect your GitHub repository to Vercel in the Vercel dashboard.
+4. Add your supabase and uploadthing environment variables in Vercel dashboard.
+5. Deploy with Vercel.
+
+## Media Sources and Credits
+
+- UI Components: [shadcn/ui](https://ui.shadcn.com)
+- Icons: [Lucide Icons](https://lucide.dev)
+- Website Images: [Unsplash](https://unsplash.com)
+- Favicon Logo: [Canva](https://canva.com)
+
+## Future Roadmap
+
+🚀 **Planned Features**
+
+1. **Enhanced Event Management**
+   - Multiple ticket tiers
+   - Event series management
+
+2. **Payment Integration**
+   - Stripe payment processing
+   - Refund handling
+   - Payment analytics
+
+3. **Social Features**
+   - Event sharing on social media
+   - Organiser networking, allowing other users to organise same events
+   - Event comments and ratings
+   - Social media account login (Google, Twitter, Facebook, etc.)
+
+4. **Advanced Organiser Analytics**
+   - Attendance tracking
+   - Revenue reporting
+
+5. **Mobile Experience**
+   - Mobile app version with Expo / React Native
+   - Push notifications
+   - QR code check-in
+
+6. **Email Integration**
+   - Send email notifications to attendees
+   - QR code tickets via email
+
+<!-- ## License -->
+
