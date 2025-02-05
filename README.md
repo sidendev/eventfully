@@ -14,7 +14,7 @@
 
 ## Live Demo
 
-- Visit the live demo site: [Eventfully](https://eventfully-demo.vercel.app/)
+- Visit the live demo site: [Eventfully](https://eventfully-app.vercel.app/)
 
 ## Features
 
