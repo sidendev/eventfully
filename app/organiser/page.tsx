@@ -68,7 +68,7 @@ export default async function OrganiserPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h1 className="text-3xl font-bold">
-                                    Organiser Dashboard
+                                    Organiser Settings
                                 </h1>
                                 <p className="text-muted-foreground mt-2">
                                     Manage your Event organiser profile and
@@ -91,7 +91,9 @@ export default async function OrganiserPage() {
                                 <TabsTrigger value="profile">
                                     Organiser Profile
                                 </TabsTrigger>
-                                <TabsTrigger value="events">Events</TabsTrigger>
+                                <TabsTrigger value="events">
+                                    Organised Events
+                                </TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="profile" className="space-y-4">
@@ -129,7 +131,7 @@ export default async function OrganiserPage() {
 
                                             <div className="space-y-2">
                                                 <Label htmlFor="name">
-                                                    Organisation Name
+                                                    Organiser Name
                                                 </Label>
                                                 <Input
                                                     id="name"
@@ -150,7 +152,7 @@ export default async function OrganiserPage() {
                                                 <Textarea
                                                     id="description"
                                                     name="description"
-                                                    placeholder="Tell people about your organisation"
+                                                    placeholder="Tell people about what type of events you organise"
                                                     defaultValue={
                                                         organiserProfile?.description ||
                                                         ''
@@ -186,7 +188,7 @@ export default async function OrganiserPage() {
                                                         organiserProfile?.contact_email ||
                                                         ''
                                                     }
-                                                    placeholder="contact@your-organisation.com"
+                                                    placeholder="contact@your-website.com"
                                                 />
                                             </div>
 

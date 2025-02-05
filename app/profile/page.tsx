@@ -68,7 +68,7 @@ export default async function ProfilePage() {
                                     <Textarea
                                         id="bio"
                                         name="bio"
-                                        placeholder="Tell us about yourself"
+                                        placeholder="Share a bit about yourself"
                                         defaultValue={profile?.bio || ''}
                                     />
                                 </div>
