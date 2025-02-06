@@ -71,15 +71,11 @@
 
 ## Getting Started
 
-### Test Account Credentials:
+### Test Account Credentials
 
-**Regular User:**
-Email: test@example.com
-Password: test123456
-
-**Event Organiser:**
-Email: organiser@example.com
-Password: test123456
+**User & Organiser login:**  
+Email: joe@example.com  
+Password: abc123
 
 ### Local Development Setup
 
