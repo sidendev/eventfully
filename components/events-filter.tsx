@@ -11,13 +11,16 @@ import {
 } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useTransition } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import { createClient } from '@/utils/supabase/client';
 
 export function EventsFilter() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [isPending, startTransition] = useTransition();
+    const [eventTypes, setEventTypes] = useState<
+        Array<{ id: string; name: string }>
+    >([]);
 
     const createQueryString = useCallback(
         (name: string, value: string) => {
@@ -33,21 +36,28 @@ export function EventsFilter() {
     );
 
     const handleSearch = useDebouncedCallback((term: string) => {
-        startTransition(() => {
-            router.push(`/?${createQueryString('search', term)}`, {
-                scroll: false,
-            });
+        router.push(`/?${createQueryString('search', term)}`, {
+            scroll: false,
         });
     }, 300);
 
     const handleFilter = (name: string, value: string) => {
-        startTransition(() => {
-            router.push(
-                `/?${createQueryString(name, value === 'all' ? '' : value)}`,
-                { scroll: false }
-            );
-        });
+        router.push(
+            `/?${createQueryString(name, value === 'all' ? '' : value)}`,
+            { scroll: false }
+        );
     };
+
+    useEffect(() => {
+        async function fetchEventTypes() {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('event_types')
+                .select('id, name');
+            if (data) setEventTypes(data);
+        }
+        fetchEventTypes();
+    }, []);
 
     return (
         <div className="w-full space-y-4">
@@ -73,10 +83,11 @@ export function EventsFilter() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="conference">Conference</SelectItem>
-                        <SelectItem value="workshop">Workshop</SelectItem>
-                        <SelectItem value="concert">Concert</SelectItem>
-                        <SelectItem value="exhibition">Exhibition</SelectItem>
+                        {eventTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                                {type.name}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
                 <Select
@@ -92,11 +103,6 @@ export function EventsFilter() {
                     </SelectContent>
                 </Select>
             </div>
-            {isPending && (
-                <div className="text-sm text-muted-foreground">
-                    Updating results...
-                </div>
-            )}
         </div>
     );
 }
