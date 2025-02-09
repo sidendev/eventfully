@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import { AddToCalendar } from '@/components/ui/add-to-calendar-wrapper';
 import { EventListItem } from '@/components/event-list-item';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export default async function MyEventsPage() {
     const supabase = await createClient();
@@ -26,7 +26,13 @@ export default async function MyEventsPage() {
             `
             *,
             event:events (
-                *,
+                id,
+                title,
+                short_description,
+                starts_at,
+                ends_at,
+                image_url,
+                is_all_day,
                 locations (*),
                 event_types (*),
                 organiser_profiles (*)
@@ -42,12 +48,12 @@ export default async function MyEventsPage() {
         return <div>Failed to load events</div>;
     }
 
-    // Getting upcoming and past events
+    // Getting upcoming and past events based on ends_at time
     const now = new Date().toISOString();
     const upcomingEvents =
-        bookings?.filter((booking) => booking.event.starts_at > now) || [];
+        bookings?.filter((booking) => booking.event.ends_at > now) || [];
     const pastEvents =
-        bookings?.filter((booking) => booking.event.starts_at <= now) || [];
+        bookings?.filter((booking) => booking.event.ends_at <= now) || [];
 
     return (
         <div className="min-h-screen bg-background">
@@ -69,21 +75,38 @@ export default async function MyEventsPage() {
                                     Past Events
                                 </TabsTrigger>
                             </TabsList>
-                        </Tabs>
-                    </div>
 
-                    {/* Events List */}
-                    <div className="space-y-6">
-                        {bookings?.length === 0 ? (
-                            <EmptyState />
-                        ) : (
-                            bookings?.map((booking) => (
-                                <EventListItem
-                                    key={booking.id}
-                                    event={booking.event}
-                                />
-                            ))
-                        )}
+                            {/* Add TabsContent components */}
+                            <TabsContent value="upcoming">
+                                <div className="space-y-6">
+                                    {upcomingEvents.length === 0 ? (
+                                        <EmptyState />
+                                    ) : (
+                                        upcomingEvents.map((booking) => (
+                                            <EventListItem
+                                                key={booking.id}
+                                                event={booking.event}
+                                            />
+                                        ))
+                                    )}
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="past">
+                                <div className="space-y-6">
+                                    {pastEvents.length === 0 ? (
+                                        <EmptyState />
+                                    ) : (
+                                        pastEvents.map((booking) => (
+                                            <EventListItem
+                                                key={booking.id}
+                                                event={booking.event}
+                                            />
+                                        ))
+                                    )}
+                                </div>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </div>
             </div>

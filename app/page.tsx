@@ -20,6 +20,8 @@ export default async function Home(props: Props) {
 
     const supabase = await createClient();
 
+    const currentTime = new Date().toISOString();
+
     let query = supabase
         .from('events')
         .select(
@@ -32,6 +34,7 @@ export default async function Home(props: Props) {
             { count: 'exact' }
         )
         .eq('is_published', true)
+        .gt('ends_at', currentTime)
         .order('starts_at', { ascending: sort !== 'latest' })
         .range(0, page * ITEMS_PER_PAGE - 1);
 

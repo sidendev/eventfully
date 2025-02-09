@@ -35,6 +35,10 @@ export default async function EventPage(props: Props) {
 
     const supabase = await createClient();
 
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
     const currentTime = new Date();
 
     const { data: event, error } = await supabase
@@ -175,12 +179,16 @@ export default async function EventPage(props: Props) {
                                 </div>
 
                                 <Button
-                                    asChild={event.is_published && !hasEnded}
+                                    asChild={
+                                        event.is_published && !hasEnded && user
+                                    }
                                     className="w-full"
                                     size="lg"
-                                    disabled={!event.is_published || hasEnded}
+                                    disabled={
+                                        !event.is_published || hasEnded || !user
+                                    }
                                 >
-                                    {event.is_published && !hasEnded ? (
+                                    {event.is_published && !hasEnded && user ? (
                                         <Link href={`/events/${event.id}/book`}>
                                             {event.is_free
                                                 ? 'Register Now'
@@ -190,7 +198,9 @@ export default async function EventPage(props: Props) {
                                         <span>
                                             {!event.is_published
                                                 ? 'Tickets Unavailable'
-                                                : 'Event Has Ended'}
+                                                : hasEnded
+                                                  ? 'Event Has Ended'
+                                                  : 'Log in to book tickets'}
                                         </span>
                                     )}
                                 </Button>
