@@ -439,6 +439,14 @@ begin
         is_published = false,
         updated_at = TIMEZONE('utc'::text, NOW())
     where id = cancel_event.event_id;
+
+    -- Update all confirmed bookings to cancelled
+    update bookings b
+    set 
+        status = 'cancelled',
+        updated_at = TIMEZONE('utc'::text, NOW())
+    where b.event_id = cancel_event.event_id
+    and b.status = 'confirmed';
 end;
 $$;
 

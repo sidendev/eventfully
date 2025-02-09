@@ -13,7 +13,6 @@ type Props = {
 
 export default async function Home(props: Props) {
     const searchParams = await props.searchParams;
-
     const sort = searchParams.sort?.toString() || 'starts_at';
     const search = searchParams.search?.toString() || '';
     const type = searchParams.type?.toString() || '';
@@ -29,34 +28,31 @@ export default async function Home(props: Props) {
             event_types(name),
             locations(name, city),
             organiser_profiles(name)
-        `
+        `,
+            { count: 'exact' }
         )
         .eq('is_published', true)
-        .order('starts_at', { ascending: sort !== 'latest' });
+        .order('starts_at', { ascending: sort !== 'latest' })
+        .range(0, page * ITEMS_PER_PAGE - 1);
 
+    // Adding search filter if present
     if (search) {
         query = query.ilike('title', `%${search}%`);
     }
-    if (type) {
+
+    // Adding type filter if present
+    if (type && type !== 'all') {
         query = query.eq('type_id', type);
     }
-
-    query = query.range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE - 1);
 
     const { data: events, error, count } = await query;
 
     if (error) {
-        console.error('Error fetching events:', error);
-        return (
-            <div className="container mx-auto px-4 py-8">
-                <div className="text-destructive">
-                    Failed to load events. Please try again later.
-                </div>
-            </div>
-        );
+        console.error('Error:', error);
+        return <div>Failed to load events</div>;
     }
 
-    const hasMore = Boolean(count && events.length < count);
+    const hasMore = Boolean(count && events && events.length < count);
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -90,7 +86,7 @@ export default async function Home(props: Props) {
                                     ))
                                 ) : (
                                     <p className="text-muted-foreground col-span-full text-center py-12">
-                                        No events found. Try adjusting your
+                                        No events found. Try adjusting the
                                         filters.
                                     </p>
                                 )}

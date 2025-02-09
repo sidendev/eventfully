@@ -20,6 +20,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { isAfter } from 'date-fns';
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -33,6 +34,8 @@ export default async function EventPage(props: Props) {
     ]);
 
     const supabase = await createClient();
+
+    const currentTime = new Date();
 
     const { data: event, error } = await supabase
         .from('events')
@@ -51,6 +54,8 @@ export default async function EventPage(props: Props) {
         console.error('Error fetching event:', error);
         notFound();
     }
+
+    const hasEnded = isAfter(currentTime, new Date(event.ends_at));
 
     return (
         <div className="min-h-screen bg-background">
@@ -169,12 +174,25 @@ export default async function EventPage(props: Props) {
                                     </div>
                                 </div>
 
-                                <Button asChild className="w-full" size="lg">
-                                    <Link href={`/events/${event.id}/book`}>
-                                        {event.is_free
-                                            ? 'Register Now'
-                                            : `Book Now - £${event.ticket_price}`}
-                                    </Link>
+                                <Button
+                                    asChild={event.is_published && !hasEnded}
+                                    className="w-full"
+                                    size="lg"
+                                    disabled={!event.is_published || hasEnded}
+                                >
+                                    {event.is_published && !hasEnded ? (
+                                        <Link href={`/events/${event.id}/book`}>
+                                            {event.is_free
+                                                ? 'Register Now'
+                                                : `Book Now - £${event.ticket_price}`}
+                                        </Link>
+                                    ) : (
+                                        <span>
+                                            {!event.is_published
+                                                ? 'Tickets Unavailable'
+                                                : 'Event Has Ended'}
+                                        </span>
+                                    )}
                                 </Button>
 
                                 <Button

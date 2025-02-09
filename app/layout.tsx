@@ -123,7 +123,6 @@ export default async function RootLayout({
                                         </nav>
 
                                         <div className="flex items-center gap-4">
-                                            <ThemeSwitcher />
                                             {user ? (
                                                 <div className="flex items-center gap-2">
                                                     <Link
@@ -243,9 +242,15 @@ export default async function RootLayout({
                             <div className="w-full">{children}</div>
                         </main>
 
-                        <footer className="border-t border-t-foreground/10 py-6 mt-8">
-                            <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-                                <p>© {new Date().getFullYear()} Eventfully</p>
+                        <footer className="border-t border-t-foreground/10 py-4 mt-8">
+                            <div className="container mx-auto px-4 flex items-center whitespace-nowrap">
+                                <div className="flex-1 pl-4">
+                                    <ThemeSwitcher />
+                                </div>
+                                <p className="flex-1 text-center text-sm text-muted-foreground">
+                                    © {new Date().getFullYear()} Eventfully
+                                </p>
+                                <div className="flex-1"></div>
                             </div>
                         </footer>
                     </div>

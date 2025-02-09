@@ -57,12 +57,6 @@ export default async function MyEventsPage() {
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between">
                             <h1 className="text-3xl font-bold">My Events</h1>
-                            <Link
-                                href="/"
-                                className="text-primary hover:underline text-sm"
-                            >
-                                Browse More Events
-                            </Link>
                         </div>
 
                         {/* Filter Tabs */}
@@ -79,7 +73,7 @@ export default async function MyEventsPage() {
                     </div>
 
                     {/* Events List */}
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {bookings?.length === 0 ? (
                             <EmptyState />
                         ) : (

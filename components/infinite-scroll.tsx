@@ -19,8 +19,10 @@ export function InfiniteScroll({
 }: InfiniteScrollProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { ref, inView } = useInView();
-    const prevItemCount = useRef(itemCount);
+    const { ref, inView } = useInView({
+        threshold: 0,
+        rootMargin: '100px',
+    });
 
     useEffect(() => {
         if (inView && hasMore) {
@@ -28,16 +30,7 @@ export function InfiniteScroll({
             params.set('page', (currentPage + 1).toString());
             router.push(`/?${params.toString()}`, { scroll: false });
         }
-    }, [inView, hasMore, currentPage, router, searchParams]);
-
-    useEffect(() => {
-        if (prevItemCount.current !== itemCount) {
-            prevItemCount.current = itemCount;
-            const params = new URLSearchParams(searchParams.toString());
-            params.delete('page');
-            router.push(`/?${params.toString()}`, { scroll: false });
-        }
-    }, [itemCount, router, searchParams]);
+    }, [inView, hasMore, currentPage]);
 
     return (
         <>
