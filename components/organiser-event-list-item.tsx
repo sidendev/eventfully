@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, MapPin, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Pencil, Trash2, Building2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
@@ -68,27 +68,24 @@ export function OrganiserEventListItem({ event }: OrganiserEventListItemProps) {
             )}
         >
             <CardContent className="p-0">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 overflow-visible">
-                    <Link
-                        href={`/events/${event.id}`}
-                        className="w-full sm:w-24 h-24 rounded-md overflow-hidden group relative"
-                    >
-                        {event.image_url ? (
-                            <>
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 overflow-visible">
+                    <div className="flex justify-center w-full sm:w-auto">
+                        <div className="relative aspect-video w-[240px] overflow-hidden rounded-md">
+                            {event.image_url ? (
                                 <Image
                                     src={event.image_url}
                                     alt={event.title}
+                                    className="object-cover"
                                     fill
-                                    className="object-cover transition-transform group-hover:scale-105"
+                                    sizes="240px"
                                 />
-                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                            </>
-                        ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <Calendar className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                        )}
-                    </Link>
+                            ) : (
+                                <div className="h-full w-full bg-muted flex items-center justify-center">
+                                    <Building2 className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-center gap-2 mb-1">

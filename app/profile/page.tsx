@@ -1,14 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import Link from 'next/link';
-import { UserCircle } from 'lucide-react';
+import { ProfileForm } from '@/components/profile-form';
 import { updateProfile } from '@/app/actions/profile';
-import { SubmitButton } from '@/components/submit-button';
-import { UploadImage } from '@/components/upload-image';
 
 export default async function ProfilePage() {
     const supabase = await createClient();
@@ -44,56 +37,11 @@ export default async function ProfilePage() {
                         </div>
 
                         <div className="space-y-6">
-                            <form action={updateProfile} className="space-y-4">
-                                {/* Profile Picture Section */}
-                                <UploadImage
-                                    defaultValue={profile?.avatar_url}
-                                    name="avatar_url"
-                                    endpoint="profileImage"
-                                />
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="username">Username</Label>
-                                    <Input
-                                        id="username"
-                                        name="username"
-                                        placeholder="Your username"
-                                        defaultValue={profile?.username || ''}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="bio">Bio</Label>
-                                    <Textarea
-                                        id="bio"
-                                        name="bio"
-                                        placeholder="Share a bit about yourself"
-                                        defaultValue={profile?.bio || ''}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        type="email"
-                                        id="email"
-                                        value={user.email}
-                                        disabled
-                                    />
-                                </div>
-
-                                <div className="pt-4 flex justify-between items-center">
-                                    <SubmitButton pendingText="Saving Changes...">
-                                        Save Changes
-                                    </SubmitButton>
-                                    <Button variant="outline" asChild>
-                                        <Link href="/events/create">
-                                            Create Event
-                                        </Link>
-                                    </Button>
-                                </div>
-                            </form>
+                            <ProfileForm
+                                profile={profile}
+                                action={updateProfile}
+                                userEmail={user.email || ''}
+                            />
                         </div>
                     </div>
                 </div>
