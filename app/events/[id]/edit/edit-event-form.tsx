@@ -19,7 +19,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { UploadImage } from '@/components/upload-image';
+import { EventImageUpload } from '@/components/event-image-upload';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -29,11 +29,13 @@ import { EventTypeDialog } from '@/components/event-type-dialog';
 import { LocationDialog } from '@/components/location-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface EditEventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
     locations: Array<{ id: string; name: string; city: string }>;
-    event: any;
+    event: any; // TODO: Type this properly
 }
 
 export function EditEventForm({
@@ -41,23 +43,82 @@ export function EditEventForm({
     locations,
     event,
 }: EditEventFormProps) {
-    // TODO: Re-enable price settings when Stripe integration is complete
-    // const [isFree, setIsFree] = useState(event.ticket_price === 0);
     const [startDate, setStartDate] = useState<Date | undefined>(
         event.starts_at ? new Date(event.starts_at) : undefined
     );
     const [endDate, setEndDate] = useState<Date | undefined>(
         event.ends_at ? new Date(event.ends_at) : undefined
     );
+    const router = useRouter();
 
-    // function to refresh locations
     const handleLocationCreated = () => {
         window.location.reload();
     };
 
-    // Add this function to refresh event types
     const handleEventTypeCreated = () => {
         window.location.reload();
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        formData.append('id', event.id);
+
+        // Checking for dates
+        if (!startDate || !endDate) {
+            toast.error('Please select both start and end dates');
+            return;
+        }
+
+        // Compare dates and times
+        if (endDate < startDate) {
+            toast.error('End date cannot be before start date');
+            return;
+        }
+
+        // If same day, check times are correct
+        if (startDate.toDateString() === endDate.toDateString()) {
+            const startDateTime = new Date(startDate);
+            const endDateTime = new Date(endDate);
+
+            // Reset seconds and milliseconds
+            startDateTime.setSeconds(0, 0);
+            endDateTime.setSeconds(0, 0);
+
+            console.log('Start DateTime:', startDateTime);
+            console.log('End DateTime:', endDateTime);
+
+            if (endDateTime < startDateTime) {
+                toast.error(
+                    'End time must be after start time for same-day events'
+                );
+                return;
+            }
+        }
+
+        try {
+            console.log('Submitting dates:', {
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+            });
+
+            const result = await updateEvent(formData);
+
+            if (result && 'type' in result) {
+                if (result.type === 'success') {
+                    toast.success(result.message);
+                    router.push('/organiser');
+                } else {
+                    toast.error(result.message);
+                }
+                return;
+            }
+
+            toast.error('Failed to update event');
+        } catch (error) {
+            console.error('Submit error:', error);
+            toast.error('Failed to update event');
+        }
     };
 
     return (
@@ -70,69 +131,65 @@ export function EditEventForm({
                 Back to dashboard
             </Link>
 
-            <div className="max-w-3xl mx-auto">
-                <form action={updateEvent} className="space-y-8">
-                    <input type="hidden" name="id" value={event.id} />
+            <div className="max-w-4xl mx-auto">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>Edit Event</CardTitle>
                             <CardDescription>
-                                Update your event details
+                                Make changes to your event details
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-8">
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Event Title</Label>
-                                    <Input
-                                        id="title"
-                                        name="title"
-                                        required
-                                        defaultValue={event.title}
-                                        placeholder="Enter event title"
-                                    />
-                                </div>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="title">Event Title</Label>
+                                <Input
+                                    id="title"
+                                    name="title"
+                                    defaultValue={event.title}
+                                    required
+                                />
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="short_description">
-                                        Short Description
-                                    </Label>
-                                    <Textarea
-                                        id="short_description"
-                                        name="short_description"
-                                        required
-                                        defaultValue={event.short_description}
-                                        placeholder="Brief description for event listings"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="short_description">
+                                    Short Description
+                                </Label>
+                                <Textarea
+                                    id="short_description"
+                                    name="short_description"
+                                    defaultValue={event.short_description}
+                                    required
+                                />
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="full_description">
-                                        Full Description
-                                    </Label>
-                                    <Textarea
-                                        id="full_description"
-                                        name="full_description"
-                                        required
-                                        defaultValue={event.full_description}
-                                        placeholder="Detailed event description"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="full_description">
+                                    Full Description
+                                </Label>
+                                <Textarea
+                                    id="full_description"
+                                    name="full_description"
+                                    defaultValue={event.full_description}
+                                    required
+                                />
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label>Event Image</Label>
-                                    <UploadImage
-                                        name="image_url"
-                                        defaultValue={event.image_url}
-                                        endpoint="eventImage"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label>Event Image</Label>
+                                <EventImageUpload
+                                    name="image_url"
+                                    defaultValue={event.image_url}
+                                    required
+                                />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="type">Event Type</Label>
+                                    <div className="flex justify-between items-center">
+                                        <Label htmlFor="type_id">
+                                            Event Type
+                                        </Label>
                                         <EventTypeDialog
                                             onEventTypeCreated={
                                                 handleEventTypeCreated
@@ -145,7 +202,7 @@ export function EditEventForm({
                                         required
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select type" />
+                                            <SelectValue placeholder="Select event type" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {eventTypes.map((type) => (
@@ -161,8 +218,8 @@ export function EditEventForm({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="location">
+                                    <div className="flex justify-between items-center">
+                                        <Label htmlFor="location_id">
                                             Location
                                         </Label>
                                         <LocationDialog
@@ -196,26 +253,22 @@ export function EditEventForm({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Start Date & Time</Label>
                                     <DateTimePicker
                                         name="starts_at"
                                         date={startDate}
-                                        setDate={(date: Date | undefined) =>
-                                            setStartDate(date)
-                                        }
+                                        setDate={setStartDate}
                                         label="Start Date & Time"
+                                        required
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>End Date & Time</Label>
                                     <DateTimePicker
                                         name="ends_at"
                                         date={endDate}
-                                        setDate={(date: Date | undefined) =>
-                                            setEndDate(date)
-                                        }
+                                        setDate={setEndDate}
                                         label="End Date & Time"
+                                        required
                                     />
                                 </div>
                             </div>
@@ -243,35 +296,19 @@ export function EditEventForm({
                                     value="0"
                                 />
 
-                                {/* TODO: Re-enable when Stripe integration is complete
-                                {!isFree && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="ticket_price">
-                                            Ticket Price (£)
-                                        </Label>
-                                        <Input
-                                            id="ticket_price"
-                                            name="ticket_price"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            defaultValue={event.ticket_price}
-                                            required
-                                        />
-                                    </div>
-                                )}
-                                */}
-
                                 <div className="space-y-2">
                                     <Label htmlFor="max_attendees">
-                                        Maximum Attendees (Optional)
+                                        Number of tickets available
                                     </Label>
                                     <Input
                                         id="max_attendees"
                                         name="max_attendees"
                                         type="number"
                                         min="1"
-                                        defaultValue={event.max_attendees || ''}
+                                        max="100000"
+                                        defaultValue={event.max_attendees}
+                                        required
+                                        placeholder="Enter number of available tickets, Max 100,000"
                                     />
                                 </div>
                             </div>

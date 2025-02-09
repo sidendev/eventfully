@@ -33,6 +33,15 @@ export function DateTimePicker({
         date ? format(date, 'HH:mm') : ''
     );
 
+    const handleDateSelect = (newDate: Date | undefined) => {
+        if (newDate && date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            newDate.setHours(hours, minutes, 0, 0);
+        }
+        setDate(newDate);
+    };
+
     const handleTimeChange = (time: string) => {
         setSelectedTime(time);
         if (date) {
@@ -77,7 +86,7 @@ export function DateTimePicker({
                         <Calendar
                             mode="single"
                             selected={date}
-                            onSelect={setDate}
+                            onSelect={handleDateSelect}
                             initialFocus
                             required={required}
                         />

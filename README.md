@@ -1,8 +1,11 @@
 <div align="center">
   <h1>Eventfully</h1>
-  <p>A modern event management platform built with Next.js and Supabase</p>
-  <img src="public/images/hero-image.png" alt="Eventfully Preview" width="800px" />
+  <p>A modern local event management platform built with Next.js and Supabase.</p>
+  <p>Users can quickly sign up and book event tickets, or create their own events to share with others using their own organiser profile.</p>
+  <img src="public/images/eventfully-screenshot.png" alt="Eventfully Preview" width="800px" />
 </div>
+
+#
 
 <div align="center">
   <a href="#features">Features</a> •
@@ -19,38 +22,41 @@
 ## Features
 
 🎫 **Event Management**
-- Create and manage events with rich details
-- Upload event images with UploadThing integration
-- Set event capacity and ticket types
-- Track bookings and attendees
+- Create and manage detailed events with images, event types, locations and more
+- Upload event images easily with UploadThing integration.
+- Set event ticket capacity (event pricing tiers to come).
+- Update event data or cancel events easily in your dashboard.
 
 👤 **User Roles**
-- Public viewing of events without authentication
+- Public viewing of events without authentication needed.
 - User registration and authentication with Supabase
-- Organiser profiles with enhanced capabilities
-- Booking management for attendees
+- Organiser profiles are available to all users but tied to the user's account for safety and security.
+- Organisers can track all upcoming and also past events they have created.
 
 📅 **Calendar Integration**
-- Add events to Google Calendar
-- Automatic timezone handling
-- Event reminders and updates
+- Add events to Google Calendar, more integrations to come.
+- Automatic timezone handling with `add-to-calendar-button-react`.
+- add-to-calendar-button-react is a package that allows you to add events to your calendar easily. Multiple calendars supported though only Google Calendar is currently fully tested and working.
+- Each user a 'my events' page to view all their bookings with calendar integration buttons.
 
 🎨 **Modern UI/UX**
-- Responsive design for all devices
-- Light and Dark mode support
-- Accessible components with ARIA labels
-- Loading states and error handling
+- Responsive design for all devices.
+- Light and Dark mode support.
+- Event search and filtering functionality.
+- Using shadcn/ui for components for easy customization by clients.
+- Accessible components with ARIA labels.
+- Loading states and error handling on forms and throughout the app.
 
 ## Tech Stack
 
 ### Core
 - [Next.js 15](https://nextjs.org/) - React framework with App Router and Server Actions
 - [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Supabase](https://supabase.com/) - Backend and Authentication
+- [Supabase](https://supabase.com/) - Backend SQL database and Authentication
 - [TailwindCSS](https://tailwindcss.com/) - Styling
 - [shadcn/ui](https://ui.shadcn.com/) - UI Components
 - [Vercel](https://vercel.com/) - Deployment
-- [UploadThing](https://uploadthing.com/) - Media File Uploads adn Storage
+- [UploadThing](https://uploadthing.com/) - Media File Uploads and Storage
 
 ### Key Packages
 
@@ -76,6 +82,15 @@
 **User & Organiser login:**  
 Email: joe@example.com  
 Password: abc123
+
+With this account you can view all events and book tickets, or create your own events and manage them in your dashboard.
+
+Joe is an organiser and and has created multiple events plus booked himself onto some events as a user.
+You can see Joes events on the my-events page and you can also checkout his organiser profile settings page.
+
+Please note that currently all events are set to 'free' though Stripe integration is coming soon.
+
+No email verification is currently implemented so you can use the details above to sign in. Password recovery is also not available because of using the example.com domain.
 
 ### Local Development Setup
 
@@ -118,6 +133,10 @@ Password: abc123
 ### Styling with shadcn/ui
 
 #### Theme Customization
+The reason for using shadcn/ui is to have a consistent theme across the app. I also like the ease of customizing the theme with the shadcn/ui theme editor so that clients can change the theme to match their brand.
+
+You can easily change the theme to have different colors and border radius which alters the look of the app a lot.
+
 You can modify the theme in `app/globals.css`:
 ```css
 @layer base {
@@ -130,6 +149,9 @@ You can modify the theme in `app/globals.css`:
 ```
 
 #### Changing Fonts
+
+The app uses the Inter font but you can change it to any other font you want very easily.
+
 1. Import your preferred font from `next/font/google` in `app/layout.tsx`:
 ```typescript
 import { Inter, Roboto, Open_Sans } from 'next/font/google';
@@ -163,13 +185,17 @@ export default function RootLayout({
 
 ## Testing
 
-🔍 **Accessibility Testing**
+The app is fully responsive and has been tested on a range of devices.
 
+Colour contrast has been checked and is compliant.
 
-📱 **Device Testing**
+ARIA labels are used throughout the app to improve accessibility, currently the app in deployment gets a warning for the dropdown menus on creating events and editing events. This is an issue with the hidden dropdown menu component, I am working on a fix for this.
 
+Next js server actions are used for the forms and they are protected by supabase auth. I plan to add further testing on the server actions in the future.
 
-🚦 **Performance Testing**
+Screen readers have been tested through the app and the forms are accessible using keyboard navigation.
+
+Sonner toast notifications have been tested and are working as expected giving feedback to the user where needed and errors are displayed.
 
 ## Deployment with Vercel
 
@@ -188,11 +214,14 @@ export default function RootLayout({
 
 ## Future Roadmap
 
-🚀 **Planned Features**
+🚀 **Planned Features**  
+
+There are a number of features that I plan to add to the app in the future.
+The SQL database is already set up for these features so they are ready to be added.
 
 1. **Enhanced Event Management**
    - Multiple ticket tiers
-   - Event series management
+   - Event series management for recurring events
 
 2. **Payment Integration**
    - Stripe payment processing

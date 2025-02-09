@@ -244,6 +244,27 @@ export async function updateEvent(formData: FormData) {
         const starts_at = formData.get('starts_at') as string;
         const ends_at = formData.get('ends_at') as string;
 
+        console.log('Received dates:', { starts_at, ends_at });
+
+        if (!starts_at || !ends_at) {
+            return {
+                type: 'error',
+                message: 'Start and end dates are required',
+            };
+        }
+
+        const startDate = new Date(starts_at);
+        const endDate = new Date(ends_at);
+
+        console.log('Parsed dates:', {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+        });
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return { type: 'error', message: 'Invalid date format' };
+        }
+
         // Validation checks
         if (
             !title ||
@@ -258,9 +279,6 @@ export async function updateEvent(formData: FormData) {
                 'Please fill in all required fields'
             );
         }
-
-        const startDate = new Date(starts_at);
-        const endDate = new Date(ends_at);
 
         if (startDate >= endDate) {
             return encodedRedirect(
@@ -287,23 +305,14 @@ export async function updateEvent(formData: FormData) {
         });
 
         if (updateError) {
-            console.error('Update event error:', updateError);
-            return encodedRedirect(
-                'error',
-                `/events/${eventId}/edit`,
-                'Failed to update event'
-            );
+            console.error('Update error:', updateError);
+            return { type: 'error', message: updateError.message };
         }
 
         revalidatePath('/organiser');
-        revalidatePath(`/events/${eventId}`);
-        return encodedRedirect(
-            'success',
-            '/organiser',
-            'Event updated successfully'
-        );
+        return { type: 'success', message: 'Event updated successfully' };
     } catch (error) {
         console.error('Event update error:', error);
-        return encodedRedirect('error', '/organiser', 'Failed to update event');
+        return { type: 'error', message: 'Failed to update event' };
     }
 }
