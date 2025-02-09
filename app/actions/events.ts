@@ -114,22 +114,16 @@ export async function createEvent(formData: FormData) {
 
         if (createError) {
             console.error('Create event error:', createError);
-            return encodedRedirect(
-                'error',
-                '/events/create',
-                'Failed to create event'
-            );
+            return { type: 'error', message: 'Failed to create event' };
         }
 
+        console.log('Event created successfully');
         revalidatePath('/organiser');
-        redirect('/organiser');
+
+        return { type: 'success', message: 'Event created successfully' };
     } catch (error) {
         console.error('Event creation error:', error);
-        return encodedRedirect(
-            'error',
-            '/events/create',
-            'Failed to create event'
-        );
+        return { type: 'error', message: 'Failed to create event' };
     }
 }
 

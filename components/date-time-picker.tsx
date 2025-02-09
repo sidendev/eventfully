@@ -38,10 +38,16 @@ export function DateTimePicker({
         if (date) {
             const [hours, minutes] = time.split(':');
             const newDate = new Date(date);
-            newDate.setHours(parseInt(hours), parseInt(minutes));
+            newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
             setDate(newDate);
         }
     };
+
+    React.useEffect(() => {
+        if (date && !selectedTime) {
+            setSelectedTime(format(date, 'HH:mm'));
+        }
+    }, [date]);
 
     return (
         <div className="space-y-2">
@@ -55,6 +61,9 @@ export function DateTimePicker({
                                 'w-[240px] justify-start text-left font-normal',
                                 !date && 'text-muted-foreground'
                             )}
+                            type="button"
+                            aria-required={required}
+                            aria-invalid={required && !date}
                         >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {date ? (

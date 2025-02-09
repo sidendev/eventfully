@@ -29,6 +29,8 @@ import { EventTypeDialog } from '@/components/event-type-dialog';
 import { LocationDialog } from '@/components/location-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface CreateEventFormProps {
     eventTypes: Array<{ id: string; name: string }>;
@@ -42,15 +44,79 @@ export function CreateEventForm({
     const [isFree] = useState(true);
     const [startDate, setStartDate] = useState<Date | undefined>(undefined);
     const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+    const router = useRouter();
 
     // function to refresh locations to be fixed
     const handleLocationCreated = () => {
         window.location.reload();
     };
 
-    // Add this function to refresh event types to be fixed
+    // function to refresh event types to be fixed
     const handleEventTypeCreated = () => {
         window.location.reload();
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+
+        // Checking for image
+        const imageUrl = formData.get('image_url') as string;
+        if (!imageUrl) {
+            toast.error('Please upload an event image');
+            return;
+        }
+
+        // Checking for dates
+        if (!startDate || !endDate) {
+            toast.error('Please select both start and end dates');
+            return;
+        }
+
+        // Compare dates and times
+        if (endDate < startDate) {
+            toast.error('End date cannot be before start date');
+            return;
+        }
+
+        // If same day, check times are correct
+        if (startDate.toDateString() === endDate.toDateString()) {
+            const startDateTime = new Date(startDate);
+            const endDateTime = new Date(endDate);
+
+            // Reset seconds and milliseconds
+            startDateTime.setSeconds(0, 0);
+            endDateTime.setSeconds(0, 0);
+
+            console.log('Start DateTime:', startDateTime);
+            console.log('End DateTime:', endDateTime);
+
+            if (endDateTime <= startDateTime) {
+                toast.error(
+                    'End time must be after start time for same-day events'
+                );
+                return;
+            }
+        }
+
+        try {
+            const result = await createEvent(formData);
+
+            if (result && 'type' in result) {
+                if (result.type === 'success') {
+                    toast.success(result.message);
+                    router.push('/organiser');
+                } else {
+                    toast.error(result.message);
+                }
+                return;
+            }
+
+            toast.error('Failed to create event');
+        } catch (error) {
+            console.error('Submit error:', error);
+            toast.error('Failed to create event');
+        }
     };
 
     return (
@@ -64,7 +130,7 @@ export function CreateEventForm({
             </Link>
 
             <div className="max-w-3xl mx-auto">
-                <form action={createEvent} className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
                     <Card>
                         <CardHeader>
                             <CardTitle>Create New Event</CardTitle>
@@ -111,7 +177,10 @@ export function CreateEventForm({
 
                                 <div className="space-y-2">
                                     <Label>Event Image</Label>
-                                    <EventImageUpload name="image_url" />
+                                    <EventImageUpload
+                                        name="image_url"
+                                        required
+                                    />
                                 </div>
                             </div>
 
@@ -226,8 +295,9 @@ export function CreateEventForm({
                                         name="max_attendees"
                                         type="number"
                                         min="1"
+                                        max="100000"
                                         required
-                                        placeholder="Enter number of available tickets"
+                                        placeholder="Enter number of available tickets, Max 100,000"
                                     />
                                 </div>
                             </div>

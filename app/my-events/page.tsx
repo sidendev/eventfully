@@ -118,13 +118,9 @@ function EmptyState() {
     return (
         <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Ticket className="h-6 w-6 text-primary" />
-                </div>
                 <h3 className="font-semibold text-lg mb-2">No Events Found</h3>
                 <p className="text-muted-foreground mb-4 max-w-sm">
-                    You haven't booked any events yet. Browse our events and
-                    find something you'll love!
+                    Browse our events and find something you'll love!
                 </p>
                 <Link href="/" className="text-primary hover:underline">
                     Browse Events

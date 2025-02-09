@@ -8,15 +8,17 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 
 interface EventImageUploadProps {
-    onChange?: (url?: string) => void;
+    onChange?: (url: string) => void;
     defaultValue?: string;
     name: string;
+    required?: boolean;
 }
 
 export function EventImageUpload({
     onChange,
     defaultValue,
     name,
+    required,
 }: EventImageUploadProps) {
     const [fileUrl, setFileUrl] = useState<string>('');
 
@@ -44,6 +46,7 @@ export function EventImageUpload({
                 type="hidden"
                 name={name}
                 value={fileUrl || defaultValue || ''}
+                required={required}
             />
 
             <UploadButton<OurFileRouter, 'eventImage'>
