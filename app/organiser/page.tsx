@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { Building2, PlusCircle, CalendarDays } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { updateOrganiserProfile } from '@/app/actions/organiser';
 import { SubmitButton } from '@/components/submit-button';
 import { UploadImage } from '@/components/upload-image';
 import { OrganiserEventListItem } from '@/components/organiser-event-list-item';
+import { DashboardTab } from '@/components/dashboard/dashboard-tab';
 
 export default async function OrganiserPage() {
     const supabase = await createClient();
@@ -89,10 +90,11 @@ export default async function OrganiserPage() {
                         <Tabs defaultValue="profile" className="space-y-6">
                             <TabsList>
                                 <TabsTrigger value="profile">
-                                    Organiser Profile
+                                    Profile
                                 </TabsTrigger>
-                                <TabsTrigger value="events">
-                                    Organised Events
+                                <TabsTrigger value="events">Events</TabsTrigger>
+                                <TabsTrigger value="dashboard">
+                                    Dashboard
                                 </TabsTrigger>
                             </TabsList>
 
@@ -238,6 +240,16 @@ export default async function OrganiserPage() {
                                         )}
                                     </CardContent>
                                 </Card>
+                            </TabsContent>
+
+                            <TabsContent
+                                value="dashboard"
+                                className="space-y-4"
+                            >
+                                <DashboardTab
+                                    organiserProfile={organiserProfile}
+                                    events={organiserEvents}
+                                />
                             </TabsContent>
                         </Tabs>
                     </div>
